@@ -23,6 +23,8 @@ skybox.animate();
 #### Options
 * parentId: The ID for the DOM element to draw panorama inside
 * images: Images to draw in panorama
+* zoomable Enable mousewheel zoom. Default false
+* hoverEnabled Enable hover events for objects. Default false
 
 ### Add raster image
 ````
@@ -87,8 +89,6 @@ Add a bitmap image into the skybox on a flat plane facing the player
 * x X coordinate for the image
 * y Y coordinate for the image
 * z z coordinate for the image
-* zoomable Enable mousewheel zoom. Default false
-* hoverEnabled Enable hover events for objects. Default false
 ### Return
 The plane this image is placed on
 
