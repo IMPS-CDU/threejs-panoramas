@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Panorama</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				background:#777;
+				padding:0;
+				margin:0;
+				font-weight: bold;
+				overflow:hidden;
+			}
+
+			#backLink {
+				display: inline-block;
+				position: absolute;
+				right: 0;
+				padding: 10px;
+				background: black;
+				opacity: 0.5;
+				color: black;
+				border-radius: 10px;
+				z-index: 500;
+			}
+			a:visited, a:hover {
+				color: white;
+			}
+			
+			.hover {
+				background-color: rgba(0, 153, 51, 0.7);
+				padding-right: 2%;
+				padding-left: 2%;
+				padding-top: 0.25%;
+				padding-bottom: 0.25%;
+				font-family: 'helvetica';
+				color: white;
+				font-weight: 100;
+			}
+			
+			#gridButton {
+				color: white;
+				font-family: helvetica;
+				font-size: 20px;
+				position: absolute;
+				left: 10px;
+				top: 10px;
+				background-color: #b0c4de;
+				width: 180px;
+				height: 40px;
+			}
+			
+			#hotspotButton {
+				color: white;
+				font-family: helvetica;
+				font-size: 20px;
+				position: absolute;
+				left: 10px;
+				top: 60px;
+				background-color: #b0c4de;
+				width: 180px;
+				height: 40px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="skyboxDiv">
+		</div>
+		<iframe id="popup" src="" style="display: none; border: none; position: absolute; zIndex=1; left:10px; top:120px; width: 420px; height: 800px ; "></iframe >
+		<div id="hover" style="display: none; position: absolute"></div>
+	<button id="gridButton">Toggle Grid</button>
+	<button  id="hotspotButton">Toggle Hot Spot</button>
+		
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.js"></script>
+		<script src="../../lib/OrbitControls.js"></script>
+		<script src="../../lib/CanvasRenderer.js"></script>
+		<script src="../../lib/Projector.js"></script>
+		<script src="../../lib/Detector.js"></script>
+		<script src="../../lib/CSS3DRenderer.js"></script>
+		<script src="../../src/js/skycube.js"></script>
+		<script>
+		(function() {
+			var gridEnabled = true;
+			var hotspotEnabled = true;
+			var hotspots = Array();
+			var topGrid;
+			var bottomGrid;
+			var skybox;
+			
+			/****************** 
+			* Local Functions
+			*******************/
+			
+			function showPopup(url) {
+				if(hotspotEnabled) {
+					var popup = document.getElementById("popup");
+					popup.src = 'loading.html';
+					popup.src = url;
+					popup.style.display = "inline";
+				} else {
+					hidePopup();
+				}
+			}
+			function hidePopup() {
+				var popup = document.getElementById("popup");
+				popup.style.display = "none";
+				popup.src = 'loading.html';
+			}
+			
+			/**
+			* Check the use of event.clientX is cross browser compatable
+			**/
+			function showHover(event, contents) {
+				if(hotspotEnabled) {
+					var hover = document.getElementById("hover");
+					// Empty the hover element
+					while(hover.firstChild) {
+						hover.removeChild(hover.firstChild);
+					}
+					hover.innerHTML = contents;
+					hover.style.left = (event.clientX + 10) + "px"
+					hover.style.top = (event.clientY + 10) + "px"
+					hover.style.display = "inline";
+				}
+			}
+			function hideHover() {
+				var hover = document.getElementById("hover");
+				hover.style.display = 'none';
+			}
+			
+			function toggleHotspots() {
+				hotspotEnabled = !hotspotEnabled;	// Invert value of hotspot enabled
+				
+				for(var i=0; i<hotspots.length; i++) {
+					hotspots[i].visible = hotspotEnabled;
+				}
+			}
+			
+			function toggleGrid() {
+				gridEnabled = !gridEnabled;	// Invert value of grid
+				topGrid.visible = gridEnabled;
+				bottomGrid.visible = gridEnabled;
+			}
+			
+			/******************************
+			* Create skybox and key data
+			******************************/
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+			
+			console.log(document.getElementById('hotspotButton'));
+			document.getElementById('hotspotButton').addEventListener('click', toggleHotspots);
+			document.getElementById('gridButton').addEventListener('click', toggleGrid);
+
+			
+			skybox = new SkyCube({
+				parentId: 'skyboxDiv',
+				images: {
+					front: 'images/posz-med.jpg',
+					back: 'images/negz-med.jpg',
+					right: 'images/posx-med.jpg',
+					left: 'images/negx-med.jpg',
+					top: 'images/posy-med.jpg',
+					bottom: 'images/negy-med.jpg'
+				},
+				hoverEnabled: true,
+				clickNothing: hidePopup,
+				hoverNowhere: hideHover,
+				zoomable: true
+			});
+
+
+			topGrid = skybox.addImage({
+				image: 'images/overlayposy.png',
+				x: 0,
+				y: 50,
+				z: 0,
+				width: 100,
+				height: 100,
+				onClick: function() {
+					hidePopup();
+				},
+				onHover: function(event) {
+					hideHover();
+				}
+			});
+			bottomGrid = skybox.addImage({
+				image: 'images/overlaynegy.png',
+				x: 0,
+				y: -65,
+				z: 0,
+				width: 130,
+				height: 130,
+				onClick: function() {
+					hidePopup();
+				},
+				onHover: function(event) {
+					hideHover();
+				}
+			});
+			bottomGrid.visible = true;
+			console.log(topGrid);
+			
+			var hotspotData = [
+				{
+					image: "images/Info_circle.png", 
+					x:  65, 
+					y:  8, 
+					z:  45,
+					width: 3,
+					height: 3,
+					onClick: function() {
+						showPopup('http://www.pacsoa.org.au/w/index.php?title=Cycas_armstrongii');
+					},
+					onHover: function(event) {
+						showHover(event, '<div class="hover" ><p>Scientific name: <i>Cycas armstrongii</i><br>Common name: Cycad</p></div>');
+					}
+				},
+				{
+					image: "images/Info_circle.png", 
+					x: -65, 
+					y: -7, 
+					z: 65,
+					width: 3,
+					height: 3,
+					onClick: function() {
+						showPopup('http://bie.ala.org.au/species/Planchonia+careya');
+					},
+					onHover: function(event) {
+						showHover(event, '<div class="hover" ><p>Scientific name: <i>Planchonia careya</i><br>Common name: Cocky Apple</p></div>');
+					}
+				},
+				{
+					image: "images/Info_circle.png", 
+					x: -65, 
+					y: -15, 
+					z: 10,
+					width: 3,
+					height: 3,
+					onClick: function() {
+						showPopup('http://bie.ala.org.au/species/Grevillea+decurrens');
+					},
+					onHover: function(event) {
+						showHover(event, '<div class="hover" ><p>Scientific name: <i>Grevillea decurrens</i><br>Common name: Grevillea</p></div>');
+					}
+				},
+				{
+					image: "images/Info_circle.png", 
+					x: -45, 
+					y: -20, 
+					z: -65,
+					width: 3,
+					height: 3,
+					onClick: function() {
+						showPopup('http://ausgrass2.myspecies.info/content/sarga-intrans');
+					},
+					onHover: function(event) {
+						showHover(event, '<div class="hover" ><p>Scientific name: <i>Sorghum (Sarga) intrans</i><br>Common name: Spear Grass (seed head)</p></div>');
+					}
+				},
+				{
+					image: "images/Info_circle.png", 
+					x: 80, 
+					y: 10, 
+					z: -8,
+					width: 3,
+					height: 3,
+					onClick: function() {
+						showPopup('http://bie.ala.org.au/species/Cochlospermum+fraseri');
+					},
+					onHover: function(event) {
+						showHover(event, '<div class="hover" ><p>Scientific name: <i>Cochlospermum fraseri</i><br>Common name: Kapok tree</p></div>');
+					}
+				},
+				{
+					image: "images/Info_circle.png", 
+					x: 45, 
+					y: 50, 
+					z: 60,
+					width: 3,
+					height: 3,
+					onClick: function() {
+						showPopup('http://bie.ala.org.au/species/Terminalia+ferdinandiana');
+					},
+					onHover: function(event) {
+						showHover(event, '<div class="hover" ><p>Scientific name: <i>Terminalia ferdinandiana</i><br>Common name: Billy Goat Plum</p></div>');
+					}
+				},
+				{
+					image: "images/Info_circle.png", 
+					x: -18, 
+					y: 30, 
+					z: 60,
+					width: 3,
+					height: 3,
+					onClick: function() {
+						showPopup('http://bie.ala.org.au/species/Persoonia+falcata');
+					},
+					onHover: function(event) {
+						showHover(event, '<div class="hover" ><p>Scientific name: <i>Persoonia falcata</i><br>Common name: Wild Pear</p></div>');
+					}
+				},
+				{
+					image: "images/Info_circle.png", 
+					x: 60, 
+					y: 35, 
+					z: -40,
+					width: 3,
+					height: 3,
+					onClick: function() {
+						showPopup('http://bie.ala.org.au/species/Eucalyptus+tetrodonta');
+					},
+					onHover: function(event) {
+						showHover(event, '<div class="hover" ><p>Scientific name: <i>Eucalyptus tetrodonta</i><br>Common name:  Stringybark</p></div>');
+					}
+				},
+				{
+					image: "images/Info_circle.png", 
+					x: 30, 
+					y: -35, 
+					z: -70,
+					width: 3,
+					height: 3,
+					onClick: function() {
+						showPopup('http://bie.ala.org.au/species/Grevillea+decurrens');
+					},
+					onHover: function(event) {
+						showHover(event, '<div class="hover" ><p>Scientific name: <i>Grevillea decurrens</i><br>Common name: Grevillea</p></div>');
+					}
+				},
+				{
+					image: "images/Info_circle.png", 
+					x: -50, 
+					y: -60, 
+					z: -40,
+					width: 3,
+					height: 3,
+					onClick: function() {
+						showPopup('http://www.csiro.au/Outcomes/Environment/Australian-Landscapes/TermitesInNthAustEcosystems.aspx');
+					},
+					onHover: function(event) {
+						showHover(event, '<div class="hover"><p>Termite mound - <br><br>Termites provide a vital role in maintaining ecosystem health in Australia’s tropical north.</p></div>');
+					}
+				}
+			];
+			hotspots = Array();	// Empty array just in case
+			for(var i=0; i<hotspotData.length; i++) {
+				hotspots.push(skybox.addImage(hotspotData[i]));
+			}
+
+						
+			skybox.animate();
+		}());
+		</script>
+	</body>
+</html>
+
