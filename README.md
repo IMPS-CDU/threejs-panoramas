@@ -18,8 +18,48 @@ var skybox = new SkyCube({
 		bottom: 'images/bottom.jpg'
 	}
 });
+skybox.animate();
+````
+#### Options
+* parentId: The ID for the DOM element to draw panorama inside
+* images: Images to draw in panorama
+
+### Add raster image
+````
+skybox.addImage(path, x, y, z);
 ````
 
+### Add a web element
+````
+var elem = document.getElementById('anElement');
+skybox.addDomElem({
+    element: elem,
+    position: {
+        x: -150
+        y: 450,
+        z: 8000
+    },
+    rotation: {
+        x: 0,
+        y: 1 * Math.PI,
+        z: 0
+    }
+});
+````
+
+### Add a mesh object
+````
+skybox.addMesh({
+    model: "objects/objMesh.js",
+    texture: 'images/objTexture.jpg',
+    x: -100,
+    y: -20,
+    z: 40,
+    onClick: function(evt) {
+        console.log("Clicked!!");
+    }
+});
+````
 
 ## Motivation
 
@@ -38,7 +78,36 @@ The IMPS team first created 3D panoramas for the interactive excursions to analy
 
 To be updated
 
+## API Reference
+
+### function addImage(path, x, y, z)
+Add a bitmap image into the skybox on a flat plane facing the player
+#### Parameters
+* image: Path to the image to display 
+* x X coordinate for the image
+* y Y coordinate for the image
+* z z coordinate for the image
+### Return
+The plane this image is placed on
+
+### addMesh(params)
+Add a 3d object into the skybox with the given texture
+#### Parameters
+* mesh Path to the object in JSON Geometry format
+* textureImage Path to the texture image (note that dimensions must be base 2)
+* x X coordinate for the image
+* y Y coordinate for the image
+* z z coordinate for the image
+
+### addCollada(params)
+
+### addDomElem(params)
+
+
+### animate()
+Start the animation loop for skycube
+
+
 ## Contributors
 
 * Matthew Elvey, IMPS team (Matthew.Elvey@cdu.edu.au)
-
