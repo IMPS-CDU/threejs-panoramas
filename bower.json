@@ -1,0 +1,6 @@
+{
+  "name": "panoramas",
+  "dependencies": {
+    "threejs": "r71"
+  }
+}

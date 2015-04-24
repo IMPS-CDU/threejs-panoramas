@@ -76,6 +76,17 @@ The IMPS team first created 3D panoramas for the interactive excursions to analy
     * The OBJLoader is required to include 3D models
     * The ColladaLoader is required to include Collada objects
 
+Libraries can be installed using a grunt task that will download the required libraries from git and copy them to the lib directory
+```
+   $ npm install
+   $ grunt
+```
+Alternatively you can use bower to get the full threejs repository at the correct version and get the required files manually
+```
+   $ npm install
+   $ bower install
+```
+
 ## Tests
 
 To be updated
