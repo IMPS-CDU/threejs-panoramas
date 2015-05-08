@@ -1,6 +1,6 @@
 {
   "name": "panoramas",
   "dependencies": {
-    "threejs": "r71"
+    "threejs": "r70"
   }
 }

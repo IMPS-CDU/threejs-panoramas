@@ -155,7 +155,8 @@
 			urls,
 			textureCube,
 			material,
-			shader;
+			shader,
+			boxSize = 100000;
 		
 		if(!params.parentId) {
 			throw new Error("parentId is not set");
@@ -168,7 +169,7 @@
 		}
 		
 		this.container = document.createElement( 'div' );
-		document.body.appendChild( this.container );		
+		document.body.appendChild( this.container );
 		
 		this.parentId = params.parentId;
 		this.container = document.getElementById(this.parentId);
@@ -177,9 +178,9 @@
 		this.clock = new THREE.Clock();
 
 		// Create the cameras and scene
-		this.camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 100000 );
+		this.camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, boxSize );
 		this.camera.position.z = 3200;
-		this.cameraCube = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 100000 );
+		this.cameraCube = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, boxSize );
 		this.scene = new THREE.Scene();
 		this.sceneCube = new THREE.Scene();
 		
@@ -480,7 +481,11 @@
 		cssObject.position.x = position.x;
 		cssObject.position.y = position.y;
 		cssObject.position.z = position.z;
-		cssObject.rotation.set(rotation.x, rotation.y, rotation.z);
+		if(params.rotation) {
+			cssObject.rotation.set(rotation.x, rotation.y, rotation.z);
+		} else {
+			cssObject.lookAt(this.cameraCube.position);
+		}
 
 		this.sceneCube.add(cssObject);
 		planeMaterial   = new THREE.MeshBasicMaterial({color: 0x000000, opacity: 0.1, side: THREE.DoubleSide });
@@ -492,7 +497,8 @@
 		// add it to the standard (WebGL) scene
 		this.sceneCube.add(cssObject);
 		this.cssScene.add(cssObject);
-
+		
+		return cssObject;
 	};
 
 	/**
@@ -610,6 +616,36 @@
 				this.camera.fov = this.minZoom;
 			}
 		}
+	};
+	
+	
+	/**
+	* Zoom camera to specified FOV using an ease-in tween
+	* @param zoomLevel the new desired camera field of view
+	**/
+	p.zoom = function(zoomLevel, time) {
+		time = time || 1000;
+		var framerate = 10;
+		var steps = time / framerate;
+		var distance = zoomLevel - this.camera.fov;
+		var avgStep = distance / steps;
+		var stepWeight = 2;
+		var _this = this;
+		
+		var interval = setInterval(function() {
+			// console.log("Step weight: "+stepWeight+", FOV: "+_this.camera.fov+", AvgStep: "+avgStep+", ThisStep: "+(avgStep * stepWeight));
+			_this.camera.fov += avgStep * stepWeight;
+			stepWeight -= 1.5 / steps;
+			if(_this.camera.fov <= zoomLevel) {
+				_this.camera.fov = zoomLevel;
+				clearInterval(interval);
+			}
+		}, framerate);
+	};
+	
+	p.lookAt = function(obj) {
+		var target = obj.position || obj;
+		this.controls.target = target;
 	};
 	
 }());
