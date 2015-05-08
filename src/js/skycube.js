@@ -229,8 +229,11 @@
 			this.renderer = new THREE.WebGLRenderer();
 		} else {
 			this.renderer = new THREE.CanvasRenderer();
-		}		
-		this.renderer.setPixelRatio( window.devicePixelRatio );
+		}
+		// This makes it a bit more version safe
+		if(this.renderer.setPixelRatio) {
+			this.renderer.setPixelRatio( window.devicePixelRatio );
+		}
 		this.renderer.setSize(window.innerWidth, window.innerHeight );
 		this.renderer.autoClear = false;
 		this.container.appendChild(this.renderer.domElement);
