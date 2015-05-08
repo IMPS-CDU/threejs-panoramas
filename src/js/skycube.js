@@ -286,6 +286,7 @@
 		this.cameraCube.updateProjectionMatrix();
 
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
+		this.cssRenderer.setSize(window.innerWidth, window.innerHeight);
 	};
 	
 	
