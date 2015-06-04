@@ -264,6 +264,26 @@
 			this.cssRenderer.domElement.addEventListener('mousewheel', this.onMouseWheel.bind(this), false);
 		}
 	};
+
+	
+	/**
+	* Bind event handlers
+	* @function on
+	* @param eventType String event type to handle
+	* @param callack function to call when event is triggered
+	**/
+	p.on = function(eventType, callback) {
+		switch (eventType) {
+		case 'change': 
+			this.controls.addEventListener(eventType, callback);
+			break;
+		case 'click':
+			this.controls.addEventListener('end', callback);
+			break;
+		default:
+			console.error("Unkown event: "+eventType);
+		}
+	};
 	
 	/**
 	* Event fired when window is resized to scale the skycube
