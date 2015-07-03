@@ -116,8 +116,6 @@
 	 **/
 	p.cssRenderer = null;
 	
-	p.hoverEnabled = false;
-	
 	p.zoomable = false;
 	
 	p.maxZoom = 20;
@@ -260,6 +258,12 @@
 			this.hoverNowhere = params.hoverNowhere;
 		}
 		
+		if(params.lookEnabled) {
+			this.controls.addEventListener('change', this.onLookAt.bind(this), false);
+			this.lookNowhere = params.lookNowhere;
+		}
+		
+		
 		if(params.zoomable) {
 			this.cssRenderer.domElement.addEventListener('mousewheel', this.onMouseWheel.bind(this), false);
 		}
@@ -330,6 +334,9 @@
 		if(params.onHover) {
 			plane.onHover = params.onHover;
 		}
+		if(params.onLook) {
+			plane.onLook = params.onLook;
+		}
 				
 		this.sceneCube.add(plane);
 		this.objects.push(plane);
@@ -389,7 +396,9 @@
 			if(params.onClick) {
 				mesh.onClick = params.onClick;
 			}
-
+			if(params.onLook) {
+				mesh.onLook = params.onLook;
+			}
 			// Force aniamation if animate is set to true (useful for debugging)
 			if(params.animate === true || (params.animate === undefined && mesh.geometry.animations)) {
 				if(!mesh.geometry.animations) {
@@ -600,6 +609,26 @@
 			}
 		} else if(this.hoverNowhere) {
 			this.hoverNowhere(event);
+		}
+	};
+	
+	/**
+	* Event called on camera move to detect if the camera is looking directly at an object. 
+	* Draws a vector from the camera and checks if it intersects with any objects. If it does it calls the onLook function on the first object. If no objects are found it calls the lookNowhere event if set
+	* @param event DOM event for mouse move
+	**/
+	p.onLookAt = function(event) {
+		var vector = new THREE.Vector3(0,0,-1);
+		vector.applyQuaternion(this.cameraCube.quaternion);
+		var ray = new THREE.Raycaster(this.cameraCube.position, vector);
+		var intersects = ray.intersectObjects(this.objects);
+		if(intersects.length > 0) {
+			if(intersects[0].object.onLook) {
+				event.object = intersects[0].object;
+				intersects[0].object.onLook.call(this, event);
+			}
+		} else if(this.lookNowhere) {
+			this.lookNowhere(event);
 		}
 	};
 	
