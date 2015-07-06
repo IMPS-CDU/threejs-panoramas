@@ -164,9 +164,7 @@
 					top: 'images/posy-med.jpg',
 					bottom: 'images/negy-med.jpg'
 				},
-				hoverEnabled: true,
 				clickNothing: hidePopup,
-				hoverNowhere: hideHover,
 				zoomable: true
 			});
 
@@ -180,9 +178,6 @@
 				height: 100,
 				onClick: function() {
 					hidePopup();
-				},
-				onHover: function(event) {
-					hideHover();
 				}
 			});
 			bottomGrid = skybox.addImage({
@@ -215,6 +210,9 @@
 					},
 					onHover: function(event) {
 						showHover(event, '<div class="hover" ><p>Scientific name: <i>Cycas armstrongii</i><br>Common name: Cycad</p></div>');
+					},
+					hoverOff: function() {
+						hideHover();
 					}
 				},
 				{
@@ -229,6 +227,9 @@
 					},
 					onHover: function(event) {
 						showHover(event, '<div class="hover" ><p>Scientific name: <i>Planchonia careya</i><br>Common name: Cocky Apple</p></div>');
+					},
+					hoverOff: function() {
+						hideHover();
 					}
 				},
 				{
@@ -243,6 +244,9 @@
 					},
 					onHover: function(event) {
 						showHover(event, '<div class="hover" ><p>Scientific name: <i>Grevillea decurrens</i><br>Common name: Grevillea</p></div>');
+					},
+					hoverOff: function() {
+						hideHover();
 					}
 				},
 				{
@@ -257,6 +261,9 @@
 					},
 					onHover: function(event) {
 						showHover(event, '<div class="hover" ><p>Scientific name: <i>Sorghum (Sarga) intrans</i><br>Common name: Spear Grass (seed head)</p></div>');
+					},
+					hoverOff: function() {
+						hideHover();
 					}
 				},
 				{
@@ -271,6 +278,9 @@
 					},
 					onHover: function(event) {
 						showHover(event, '<div class="hover" ><p>Scientific name: <i>Cochlospermum fraseri</i><br>Common name: Kapok tree</p></div>');
+					},
+					hoverOff: function() {
+						hideHover();
 					}
 				},
 				{
@@ -285,6 +295,9 @@
 					},
 					onHover: function(event) {
 						showHover(event, '<div class="hover" ><p>Scientific name: <i>Terminalia ferdinandiana</i><br>Common name: Billy Goat Plum</p></div>');
+					},
+					hoverOff: function() {
+						hideHover();
 					}
 				},
 				{
@@ -299,6 +312,9 @@
 					},
 					onHover: function(event) {
 						showHover(event, '<div class="hover" ><p>Scientific name: <i>Persoonia falcata</i><br>Common name: Wild Pear</p></div>');
+					},
+					hoverOff: function() {
+						hideHover();
 					}
 				},
 				{
@@ -313,6 +329,9 @@
 					},
 					onHover: function(event) {
 						showHover(event, '<div class="hover" ><p>Scientific name: <i>Eucalyptus tetrodonta</i><br>Common name:  Stringybark</p></div>');
+					},
+					hoverOff: function() {
+						hideHover();
 					}
 				},
 				{
@@ -327,6 +346,9 @@
 					},
 					onHover: function(event) {
 						showHover(event, '<div class="hover" ><p>Scientific name: <i>Grevillea decurrens</i><br>Common name: Grevillea</p></div>');
+					},
+					hoverOff: function() {
+						hideHover();
 					}
 				},
 				{
@@ -341,6 +363,9 @@
 					},
 					onHover: function(event) {
 						showHover(event, '<div class="hover"><p>Termite mound - <br><br>Termites provide a vital role in maintaining ecosystem health in Australia’s tropical north.</p></div>');
+					},
+					hoverOff: function() {
+						hideHover();
 					}
 				}
 			];

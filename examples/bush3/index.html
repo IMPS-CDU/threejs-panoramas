@@ -166,7 +166,6 @@
 				},
 				hoverEnabled: true,
 				clickNothing: hidePopup,
-				hoverNowhere: hideHover,
 				zoomable: true
 			});
 
@@ -180,9 +179,6 @@
 				height: 100,
 				onClick: function() {
 					hidePopup();
-				},
-				onHover: function(event) {
-					hideHover();
 				}
 			});
 			bottomGrid = skybox.addImage({
@@ -215,6 +211,9 @@
 					},
 					onHover: function(event) {
 						showHover(event, '<div class="hover" ><p>Scientific name: <i>Cycas armstrongii</i><br>Common name: Cycad</p></div>');
+					},
+					hoverOff: function() {
+						hideHover();
 					}
 				},
 				{
@@ -229,6 +228,9 @@
 					},
 					onHover: function(event) {
 						showHover(event, '<div class="hover" ><p>Scientific name: <i>Exocarpos latifolius</i><br>Common name: Native Cherry</p></div>');
+					},
+					hoverOff: function() {
+						hideHover();
 					}
 				},
 				{
@@ -243,6 +245,9 @@
 					},
 					onHover: function(event) {
 						showHover(event, '<div class="hover" ><p>Scientific name: <i>Grevillea decurrens</i><br>Common name: Grevillea</p></div>');
+					},
+					hoverOff: function() {
+						hideHover();
 					}
 				},
 				{
@@ -257,6 +262,9 @@
 					},
 					onHover: function(event) {
 						showHover(event, '<div class="hover" ><p>Scientific name: <i>Sorghum (Sarga) intrans</i><br>Common name: Spear Grass</p></div>');
+					},
+					hoverOff: function() {
+						hideHover();
 					}
 				},
 				{
@@ -271,6 +279,9 @@
 					},
 					onHover: function(event) {
 						showHover(event, '<div class="hover" ><p>Scientific name: <i>Cochlospermum fraseri</i><br>Common name: Kapok tree</p></div>');
+					},
+					hoverOff: function() {
+						hideHover();
 					}
 				},
 				{
@@ -285,6 +296,9 @@
 					},
 					onHover: function(event) {
 						showHover(event, '<div class="hover" ><p>Scientific name: <i>Cochlospermum fraseri</i><br>Common name: Kapok tree</p></div>');
+					},
+					hoverOff: function() {
+						hideHover();
 					}
 				},
 				{
@@ -299,6 +313,9 @@
 					},
 					onHover: function(event) {
 						showHover(event, '<div class="hover" ><p>Scientific name: <i>Terminalia ferdinandiana</i><br>Common name: Billy Goat Plum</p></div>');
+					},
+					hoverOff: function() {
+						hideHover();
 					}
 				},
 				{
@@ -311,6 +328,9 @@
 					// No onclick of this hotspot
 					onHover: function(event) {
 						showHover(event, '<div class="hover" ><p>Activity: Visually estimate the percentage <br>of grass cover, herbaceous plants cover, <br>leaf litter, and gravel in this virtual 1 meter <br>quadrat.</p></div>');
+					},
+					hoverOff: function() {
+						hideHover();
 					}
 				},
 				{
@@ -325,6 +345,9 @@
 					},
 					onHover: function(event) {
 						showHover(event, '<div class="hover" ><p>Scientific name: <i>Eucalyptus tetrodonta</i><br>Common name:  Stringybark</p></div>');
+					},
+					hoverOff: function() {
+						hideHover();
 					}
 				},
 				{
@@ -339,6 +362,9 @@
 					},
 					onHover: function(event) {
 						showHover(event, '<div class="hover" ><p>Scientific name: <i>Grevillea decurrens</i><br>Common name: Grevillea</p></div>');
+					},
+					hoverOff: function() {
+						hideHover();
 					}
 				},
 				{
@@ -353,6 +379,9 @@
 					},
 					onHover: function(event) {
 						showHover(event, '<div class="hover"><p>Scientific name: <i>Alstonia actinophylla</i><br>Common name: Milkwood</p></div>');
+					},
+					hoverOff: function() {
+						hideHover();
 					}
 				},
 				{
@@ -367,6 +396,9 @@
 					},
 					onHover: function(event) {
 						showHover(event, '<div class="hover"><p>Standing dead trees and woody debris <br>are used by a wide range of fauna.</p></div>');
+					},
+					hoverOff: function() {
+						hideHover();
 					}
 				}
 			];

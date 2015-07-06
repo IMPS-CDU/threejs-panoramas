@@ -123,6 +123,52 @@
 	p.minZoom = 80;
 	
 	p.webgl = false;
+	
+	/**
+	* Target of current hover event - used to determine if hover has changed when triggering events
+	* @name hoverTarget
+	* @type THREE.Object
+	* @memberof SkyCube
+	**/
+	p.hoverTarget = null;
+	/**
+	* Javascript event to dispatch when the mouse is moved over an object
+	* @name mouseOnEvt
+	* @type Event
+	**/
+	var mouseOnEvt = new Event('mouseon');
+	/**
+	* Javascript event to dispatch when the mouse is moved off an object
+	* @name mouseOutEvt
+	* @type Event
+	**/
+	var mouseOutEvt = new Event('mouseout');
+	/**
+	* Target of current look event - used to determine if hover has changed when triggering events
+	* @name lookTarget
+	* @type THREE.Object
+	* @memberof SkyCube
+	**/
+	p.lookTarget = null;
+	/**
+	* Javascript event to dispatch when the camera looks directly at an object (the object is centered in the camera's field of view)
+	* @name lookAtEvt
+	* @type Event
+	**/
+	var lookAtEvt = new Event("lookat");
+	/**
+	* Javascript event to dispatch when the camera no longer looks directly at an object (it may still be visible in the camera however)
+	* @name lookAtEvt
+	* @type Event
+	**/
+	var lookOffEvt = new Event('lookoff');
+	/**
+	* Object holding event listeners for skybox so they can be disabled if required
+	* @name listeners
+	* @type Object
+	* @memberof SkyCube
+	**/
+	p.listeners = {};
 
 
 	function webglAvailable() {
@@ -252,15 +298,12 @@
 		this.clickNothing = params.clickNothing;
 		this.controls.addEventListener('change', this.render.bind(this));
 		
-		if(params.hoverEnabled) {
-			this.cssRenderer.domElement.addEventListener("mousemove", this.onMouseMove.bind(this), false);
-			this.cssRenderer.domElement.addEventListener("touchmove", this.onMouseMove.bind(this), false);
-			this.hoverNowhere = params.hoverNowhere;
+		if(params.hoverEnabled !== false) {
+			this.enableHover();
 		}
 		
-		if(params.lookEnabled) {
-			this.controls.addEventListener('change', this.onLookAt.bind(this), false);
-			this.lookNowhere = params.lookNowhere;
+		if(params.lookEnabled !== false) {
+			this.enableLookAt();
 		}
 		
 		
@@ -269,9 +312,48 @@
 		}
 	};
 
+	/**
+	* Enable hover events for skybox objects (I don't *think* it will have a significant performance impact)
+	**/
+	p.enableHover = function() {
+		this.listeners.mousemove = this.cssRenderer.domElement.addEventListener("mousemove", this.onMouseMove.bind(this), false);
+		this.listeners.touchmove = this.cssRenderer.domElement.addEventListener("touchmove", this.onMouseMove.bind(this), false);
+	}
 	
 	/**
-	* Bind event handlers
+	* Disable hover events for skybox objects (just in case I'm wrong about the performenace) 
+	**/
+	p.disableHover = function() {
+		if(this.listeners.mousemove) {
+			this.cssRenderer.domElement.removeEventListener("mousemove", this.listeners.mousemove, false);
+			this.listiners.mousemove = null;
+		}
+		if(this.listeners.touchmove) {
+			this.cssRenderer.domElement.removeEventListener("touchmove", this.listeners.touchmove, false);
+			this.listiners.touchmove = null;
+		}
+	}
+	
+	/**
+	* Enable lookat and lookoff events for skybox objects
+	**/
+	p.enableLookAt = function() {
+		this.listeners.lookAt = this.controls.addEventListener('change', this.onLookAt.bind(this), false);
+	}
+	
+	/**
+	* Disable lookat and lookoff events for skybox objects (just in case there is a performance hit)
+	**/
+	p.disableLookAt = function() {
+		if(this.listeners.lookAt) {
+			this.controls.addEventListener('change', this.listeners.lookAt, false);
+			this.listeners.lookAt = null;
+		}
+	}
+	
+	
+	/**
+	* Bind event handlers to controllers
 	* @function on
 	* @param eventType String event type to handle
 	* @param callack function to call when event is triggered
@@ -352,10 +434,17 @@
 			plane.onClick = params.onClick;
 		}
 		if(params.onHover) {
-			plane.onHover = params.onHover;
+			plane.addEventListener('mouseon', params.onHover);
 		}
+		if(params.hoverOff) {
+			plane.addEventListener('mouseout', params.hoverOff);
+		}
+		
 		if(params.onLook) {
-			plane.onLook = params.onLook;
+			plane.addEventListener('lookat', params.onLook);
+		}
+		if(params.lookOff) {
+			plane.addEventListener('lookoff', params.lookOff);
 		}
 				
 		this.sceneCube.add(plane);
@@ -623,12 +712,21 @@
 
 		intersects = ray.intersectObjects(this.objects);
 		if(intersects.length > 0){
-			if(intersects[0].object.onHover) {
-				event.object = intersects[0].object;
-				intersects[0].object.onHover.call(this, event);
+			if(intersects[0].object !== this.hoverTarget) {
+				if(this.hoverTarget) {
+					this.hoverTarget.dispatchEvent(mouseOutEvt);
+				}
+				this.hoverTarget = intersects[0].object;
+				mouseOnEvt.clientX = event.clientX;
+				mouseOnEvt.clientY = event.clientY;
+				this.hoverTarget.dispatchEvent(mouseOnEvt);
 			}
-		} else if(this.hoverNowhere) {
-			this.hoverNowhere(event);
+			
+		} else {
+			if(this.hoverTarget) {
+				this.hoverTarget.dispatchEvent(mouseOutEvt);
+				this.hoverTarget = null;
+			}
 		}
 	};
 	
@@ -637,18 +735,24 @@
 	* Draws a vector from the camera and checks if it intersects with any objects. If it does it calls the onLook function on the first object. If no objects are found it calls the lookNowhere event if set
 	* @param event DOM event for mouse move
 	**/
-	p.onLookAt = function(event) {
+	p.onLookAt = function() {
 		var vector = new THREE.Vector3(0,0,-1);
 		vector.applyQuaternion(this.cameraCube.quaternion);
 		var ray = new THREE.Raycaster(this.cameraCube.position, vector);
 		var intersects = ray.intersectObjects(this.objects);
 		if(intersects.length > 0) {
-			if(intersects[0].object.onLook) {
-				event.object = intersects[0].object;
-				intersects[0].object.onLook.call(this, event);
+			if(intersects[0].object !== this.hoverTarget) {
+				if(this.lookTarget) {
+					this.lookTarget.dispatchEvent(lookOffEvt);
+				}
+				this.lookTarget = intersects[0].object;
+				this.lookTarget.dispatchEvent(lookAtEvt);
 			}
-		} else if(this.lookNowhere) {
-			this.lookNowhere(event);
+		} else {
+			if(this.lookTarget) {
+				this.lookTarget.dispatchEvent(lookOffEvt);
+				this.lookTarget = null;
+			}
 		}
 	};
 	
