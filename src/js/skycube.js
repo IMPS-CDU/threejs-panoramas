@@ -231,14 +231,27 @@
 		this.sceneCube = new THREE.Scene();
 		
 		// Make the skycube
-		urls = [
-			this.images.right,
-			this.images.left,
-			this.images.top,
-			this.images.bottom,
-			this.images.front,
-			this.images.back
-		];
+		// Early versions built the cube in reverse. To avoid breaking anything using those versions you must explicitly state it is not reversed. 
+		// It is recommended that those applications start setting the flag to true however as the default will change in a future update
+		if(params.reverse === false) {
+			urls = [
+				this.images.left,
+				this.images.right,
+				this.images.top,
+				this.images.bottom,
+				this.images.back,
+				this.images.front
+			];
+		} else {
+			urls = [
+				this.images.right,
+				this.images.left,
+				this.images.top,
+				this.images.bottom,
+				this.images.front,
+				this.images.back
+			];
+		}
 		
 		/* This block replaces the following and will work with canvanRenderer (although IE still fails) BUT it inverts the images
 		var materialArray = [];
@@ -481,7 +494,8 @@
 				x: x,
 				y: y,
 				z: z
-			}
+			},
+			rotation: params.rotation
 		});
 	};
 	
