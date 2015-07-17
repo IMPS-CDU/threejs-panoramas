@@ -600,7 +600,7 @@
 		var pxRegex = /([0-9]+)px/;
 
 		var matches;
-		if(dimensionString.search(numRegex)) {
+		if(dimensionString === parseInt(dimensionString) || dimensionString.search(numRegex)) {
 			clean = parseInt(dimensionString);
 		} else if((matches = percentRegex.exec(dimensionString)) !== null) {
 			// If percent is set get the width as a percent of the window
