@@ -5,7 +5,7 @@
 * Maybe handle touch events using tocca http://gianlucaguarini.github.io/Tocca.js/
 **/
 (function() {
-	"use strict";
+	'use strict';
 	
 	var SkyCube = function(params) {
 		this.init(params);
@@ -157,7 +157,7 @@
 	* @name lookAtEvt
 	* @type Event
 	**/
-	var lookAtEvt = new Event("lookat");
+	var lookAtEvt = new Event('lookat');
 	/**
 	* Javascript event to dispatch when the camera no longer looks directly at an object (it may still be visible in the camera however)
 	* @name lookAtEvt
@@ -205,13 +205,13 @@
 			boxSize = 100000;
 		
 		if(!params.parentId) {
-			throw new Error("parentId is not set");
+			throw new Error('parentId is not set');
 		}
 		if(!params.images) {
-			throw new Error("images not set for skybox");
+			throw new Error('images not set for skybox');
 		}
 		if(!params.images.right || !params.images.left || !params.images.top || !params.images.bottom || !params.images.front || !params.images.back) {
-			throw new Error("Missing images. Ensure images are set for right, left, top, bottom, front and back");
+			throw new Error('Missing images. Ensure images are set for right, left, top, bottom, front and back');
 		}
 		
 		this.container = document.createElement( 'div' );
@@ -320,30 +320,30 @@
 	* Enable hover events for skybox objects (I don't *think* it will have a significant performance impact)
 	**/
 	p.enableHover = function() {
-		this.listeners.mousemove = this.cssRenderer.domElement.addEventListener("mousemove", this.onMouseMove.bind(this), false);
-		this.listeners.touchmove = this.cssRenderer.domElement.addEventListener("touchmove", this.onMouseMove.bind(this), false);
-	}
+		this.listeners.mousemove = this.cssRenderer.domElement.addEventListener('mousemove', this.onMouseMove.bind(this), false);
+		this.listeners.touchmove = this.cssRenderer.domElement.addEventListener('touchmove', this.onMouseMove.bind(this), false);
+	};
 	
 	/**
 	* Disable hover events for skybox objects (just in case I'm wrong about the performenace) 
 	**/
 	p.disableHover = function() {
 		if(this.listeners.mousemove) {
-			this.cssRenderer.domElement.removeEventListener("mousemove", this.listeners.mousemove, false);
+			this.cssRenderer.domElement.removeEventListener('mousemove', this.listeners.mousemove, false);
 			this.listiners.mousemove = null;
 		}
 		if(this.listeners.touchmove) {
-			this.cssRenderer.domElement.removeEventListener("touchmove", this.listeners.touchmove, false);
+			this.cssRenderer.domElement.removeEventListener('touchmove', this.listeners.touchmove, false);
 			this.listiners.touchmove = null;
 		}
-	}
+	};
 	
 	/**
 	* Enable lookat and lookoff events for skybox objects
 	**/
 	p.enableLookAt = function() {
 		this.listeners.lookAt = this.controls.addEventListener('change', this.onLookAt.bind(this), false);
-	}
+	};
 	
 	/**
 	* Disable lookat and lookoff events for skybox objects (just in case there is a performance hit)
@@ -353,7 +353,7 @@
 			this.controls.addEventListener('change', this.listeners.lookAt, false);
 			this.listeners.lookAt = null;
 		}
-	}
+	};
 	
 	
 	/**
@@ -371,7 +371,7 @@
 			this.controls.addEventListener('end', callback);
 			break;
 		default:
-			console.error("Unkown event: "+eventType);
+			throw new Error('Unkown event: ' + eventType);
 		}
 	};
 	
@@ -382,12 +382,6 @@
 	* @memberof Skycube
 	*/
 	p.onWindowResize = function() {
-		var 
-			windowHalfX,
-			windowHalfY;
-			
-		windowHalfX = window.innerWidth / 2;
-		windowHalfY = window.innerHeight / 2;
 
 		this.camera.aspect = window.innerWidth / window.innerHeight;
 		this.camera.updateProjectionMatrix();
@@ -421,11 +415,11 @@
 			plane;
 			
 		if(!image) {
-			throw new Error("Unable to add image: Image path is not set");
+			throw new Error('Unable to add image: Image path is not set');
 		}
 
 		texture = THREE.ImageUtils.loadTexture( image );
-		material = new THREE.MeshBasicMaterial({ map : texture, transparent: true});
+		material = new THREE.MeshBasicMaterial({ map: texture, transparent: true});
 		plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(width, height), material);
 
 		plane.position.x = x;
@@ -476,10 +470,10 @@
 		_this = this;
 		// Handle params
 		if(!params.model) {
-			throw new Error("No model set");
+			throw new Error('No model set');
 		}
 		if(!params.texture) {
-			throw new Error("No texture set");
+			throw new Error('No texture set');
 		}
 		x = params.x || 0;
 		y = params.y || 0;
@@ -497,7 +491,7 @@
 				mesh,
 				animation;
 		
-			texture = new THREE.ImageUtils.loadTexture(params.texture);
+			texture = THREE.ImageUtils.loadTexture(params.texture);
 			material = new THREE.MeshBasicMaterial({
 				map: texture
 			});
@@ -515,7 +509,7 @@
 			// Force aniamation if animate is set to true (useful for debugging)
 			if(params.animate === true || (params.animate === undefined && mesh.geometry.animations)) {
 				if(!mesh.geometry.animations) {
-					throw new Error("No animations set for model "+params.model);
+					throw new Error('No animations set for model ' + params.model);
 				}
 				
 				animation = new THREE.Animation(mesh, mesh.geometry.animations[0]);
@@ -533,7 +527,7 @@
 			_this;
 			
 		if(!params.model) {
-			throw new Error("No object set");
+			throw new Error('No object set');
 		}
 		
 		loader = new THREE.ColladaLoader();
@@ -571,14 +565,14 @@
 			rotation,
 			cssObject,
 			planeMaterial,
-			planeWidth,
-			planeHeight,
+			planeWidth = params.width || 360,	// Can this be calculated from the elment 
+			planeHeight = params.height || 120, // Can this be calculated from the element
 			planeGeometry,
 			planeMesh;
 		
 		
 		if(!params.element) {
-			throw new Error("No element set");
+			throw new Error('No element set');
 		}
 		
 		position = params.position || {};
@@ -614,13 +608,10 @@
 		}
 
 		this.sceneCube.add(cssObject);
-		planeMaterial   = new THREE.MeshBasicMaterial({color: 0x000000, opacity: 0.1, side: THREE.DoubleSide });
-		// TODO: Clean up these magic numbers
-		planeWidth = 360;
-		planeHeight = 120;
+		planeMaterial = new THREE.MeshBasicMaterial({color: 0x000000, opacity: 0.1, side: THREE.DoubleSide });
 		planeGeometry = new THREE.PlaneGeometry( planeWidth, planeHeight );
-		planeMesh= new THREE.Mesh( planeGeometry, planeMaterial );
-		planeMesh.position.y += planeHeight/2;
+		planeMesh = new THREE.Mesh( planeGeometry, planeMaterial );
+		planeMesh.position.y += planeHeight / 2;
 		// add it to the standard (WebGL) scene
 		this.sceneCube.add(cssObject);
 		this.cssScene.add(cssObject);
@@ -680,7 +671,7 @@
 			ray,
 			intersects;
 			
-		mouse = new THREE.Vector3((event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 1);
+		mouse = new THREE.Vector3((event.clientX / window.innerWidth ) * 2 - 1, -( event.clientY / window.innerHeight ) * 2 + 1, 1);
 	
 		vector = new THREE.Vector3( mouse.x, mouse.y, 1 );
 		vector.unproject(this.cameraCube);
@@ -709,7 +700,7 @@
 			ray,
 			intersects;
 		
-		mouse = new THREE.Vector3((event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 1);
+		mouse = new THREE.Vector3((event.clientX / window.innerWidth ) * 2 - 1, -( event.clientY / window.innerHeight ) * 2 + 1, 1);
 
 		vector = new THREE.Vector3( mouse.x, mouse.y, 1 );
 		vector.unproject(this.cameraCube);
@@ -741,7 +732,7 @@
 	* @param event DOM event for mouse move
 	**/
 	p.onLookAt = function() {
-		var vector = new THREE.Vector3(0,0,-1);
+		var vector = new THREE.Vector3(0, 0, -1);
 		vector.applyQuaternion(this.cameraCube.quaternion);
 		var ray = new THREE.Raycaster(this.cameraCube.position, vector);
 		var intersects = ray.intersectObjects(this.objects);
