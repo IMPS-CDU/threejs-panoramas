@@ -13,6 +13,8 @@
 	window.SkyCube = SkyCube;
 	var p = SkyCube.prototype;
 	
+	var defaultBoxSegments = 14; // The number of segments in each dimension of the skybox geometry (lower values can cause warping)
+	var defaultBoxDimensions = 300;	// The dimensions of the box to draw
 	
 	// Public Properties
 	
@@ -265,7 +267,9 @@
 		} );
 		
 		// Note that the mesh needs width/height/depth segmets set to a value like 7 for canvas renderer to avoid warping
-		this.mesh = new THREE.Mesh( new THREE.BoxGeometry(300, 300, 300, 7, 7, 7), material );
+		var boxDimensions = params.boxDimensions || defaultBoxDimensions;
+		var boxSegments = params.boxSegments || defaultBoxSegments;
+		this.mesh = new THREE.Mesh( new THREE.BoxGeometry(boxDimensions, boxDimensions, boxDimensions, boxSegments, boxSegments, boxSegments), material );
 		this.sceneCube.add(this.mesh);
 
 		this.webgl = webglAvailable();
@@ -611,6 +615,7 @@
 
 		this.sceneCube.add(cssObject);
 		planeMaterial   = new THREE.MeshBasicMaterial({color: 0x000000, opacity: 0.1, side: THREE.DoubleSide });
+		// TODO: Clean up these magic numbers
 		planeWidth = 360;
 		planeHeight = 120;
 		planeGeometry = new THREE.PlaneGeometry( planeWidth, planeHeight );
