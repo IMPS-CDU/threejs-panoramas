@@ -558,22 +558,51 @@
 			_this.sceneCube.add(dae);
 		});
 	};
+	
+	function convertHtmlDimensionToPx(dimensionString) {
+		var clean = null;
+		var numRegex = /[0-9]+/;
+		var percentRegex = /([0-9]+)%/;
+		var pxRegex = /([0-9]+)px/;
+
+		var matches;
+		if(dimensionString.search(numRegex)) {
+			clean = parseInt(dimensionString);
+		} else if((matches = percentRegex.exec(dimensionString)) !== null) {
+			// If percent is set get the width as a percent of the window
+			clean = window.innerWidth * (parseInt(matches[1], 10) / 100);
+		} else if((matches = pxRegex.exec(dimensionString)) !== null) {
+			clean = parseInt(matches[1], 10);
+		} else {
+			throw new Error('Unknown HTML dimension string: ' + dimensionString);
+		}
+		return clean;
+	}
 
 	p.addDomElem = function(params) {
 		var 
 			position,
 			rotation,
 			cssObject,
+			element = params.element,
+			defaultDimensions = 360,	// This value is effectively arbitrary. It sets the plane dimensions if none are specified and we can't calculate them
 			planeMaterial,
-			planeWidth = params.width || 360,	// Can this be calculated from the elment 
-			planeHeight = params.height || 120, // Can this be calculated from the element
+			planeWidth,
+			planeHeight,
 			planeGeometry,
 			planeMesh;
 		
 		
-		if(!params.element) {
+		if(!element) {
 			throw new Error('No element set');
 		}
+		
+		// Get or calculate the plane dimensions
+		planeWidth = params.width || element.offsetWidth || element.width || element.style.width || defaultDimensions;
+		planeWidth = convertHtmlDimensionToPx(planeWidth);
+		planeHeight = params.height || element.offsetHeight || element.width || element.style.height || defaultDimensions;
+		planeHeight = convertHtmlDimensionToPx(planeHeight);
+		
 		
 		position = params.position || {};
 		if(!position.x) {
@@ -597,7 +626,7 @@
 		}
 		
 		
-		cssObject = new THREE.CSS3DObject(params.element);
+		cssObject = new THREE.CSS3DObject(element);
 		cssObject.position.x = position.x;
 		cssObject.position.y = position.y;
 		cssObject.position.z = position.z;
