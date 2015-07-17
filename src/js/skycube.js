@@ -396,10 +396,10 @@
 	
 	/**
 	* Add a bitmap image into the skybox on a flat plane facing the player
-	* @param image Path to the image to display
-	* @param x X coordinate for the image
-	* @param y Y coordinate for the image
-	* @param z z coordinate for the image
+	* @param params.image Path to the image to display
+	* @param params.x X coordinate for the image
+	* @param params.y Y coordinate for the image
+	* @param params.z z coordinate for the image
 	* @return The plane this image is placed on
 	**/
 	p.addImage = function(params) {
@@ -449,6 +449,40 @@
 		this.objects.push(plane);
 
 		return plane;
+	};
+	
+	/**
+	* Add a bitmap image into the skybox as a DOM element using the CSS renderer
+	* @param path Path to the image to display
+	* @param params.x X coordinate for the image
+	* @param params.y Y coordinate for the image
+	* @param params.z z coordinate for the image
+	* @param params.width Optional width for the image
+	* @param params.height Optional height for the image
+	* @return The plane this image is placed on (the image DOM element can be accessed through plane.element)
+	**/
+	p.addImageCSS = function(path, params) {
+		var
+			x = params.x || 0,
+			y = params.y || 0,
+			z = params.z || 0,
+			img = new Image();
+
+		img.src = path;
+		if(params.width) {
+			img.style.width = params.width;
+		}
+		if(params.height) {
+			img.style.height = params.height;
+		}
+		return this.addDomElem({
+			element: img,
+			position: {
+				x: x,
+				y: y,
+				z: z
+			}
+		});
 	};
 	
 	/**
