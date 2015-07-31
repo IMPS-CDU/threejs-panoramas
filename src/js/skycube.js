@@ -583,27 +583,30 @@
 		
 		
 		loader.options.convertUpAxis = true;	// Not sure what this does
-		loader.load(params.model, function(collada) {
-			var dae = collada.scene;
-			dae.traverse(function(child) {
-				if(child instanceof THREE.SkinnedMesh) {
-					var animation = new THREE.Animation(child, child.geometry.animation);
-					animation.play();
+		return new Promise(function(resolve) {
+			loader.load(params.model, function(collada) {
+				var dae = collada.scene;
+				dae.traverse(function(child) {
+					if(child instanceof THREE.SkinnedMesh) {
+						var animation = new THREE.Animation(child, child.geometry.animation);
+						animation.play();
+					}
+				});
+				if(params.x) {
+					dae.position.x = params.x;
 				}
+				if(params.y) {
+					dae.position.y = params.y;
+				}
+				if(params.z) {
+					dae.position.z = params.z;
+				}
+			
+				dae.updateMatrix();
+			
+				_this.sceneCube.add(dae);
+				resolve(dae);
 			});
-			if(params.x) {
-				dae.position.x = params.x;
-			}
-			if(params.y) {
-				dae.position.y = params.y;
-			}
-			if(params.z) {
-				dae.position.z = params.z;
-			}
-			
-			dae.updateMatrix();
-			
-			_this.sceneCube.add(dae);
 		});
 	};
 	
