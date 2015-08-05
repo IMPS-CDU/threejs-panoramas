@@ -532,40 +532,44 @@
 		} else {
 			loader = new THREE.JSONLoader();
 		}
-		loader.load(params.model, function( geometry ) {
-			var
-				texture,
-				material,
-				mesh,
-				animation;
+		return new Promise(function(resolve, reject) {
+			loader.load(params.model, function( geometry ) {
+				var
+					texture,
+					material,
+					mesh,
+					animation;
 		
-			texture = THREE.ImageUtils.loadTexture(params.texture);
-			material = new THREE.MeshBasicMaterial({
-				map: texture
-			});
-			mesh = new THREE.Mesh(geometry, material);
-			mesh.position.x = x;
-			mesh.position.y = y;
-			mesh.position.z = z;
+				texture = THREE.ImageUtils.loadTexture(params.texture);
+				material = new THREE.MeshBasicMaterial({
+					map: texture
+				});
+				mesh = new THREE.Mesh(geometry, material);
+				mesh.position.x = x;
+				mesh.position.y = y;
+				mesh.position.z = z;
 			
-			if(params.onClick) {
-				mesh.onClick = params.onClick;
-			}
-			if(params.onLook) {
-				mesh.onLook = params.onLook;
-			}
-			// Force aniamation if animate is set to true (useful for debugging)
-			if(params.animate === true || (params.animate === undefined && mesh.geometry.animations)) {
-				if(!mesh.geometry.animations) {
-					throw new Error('No animations set for model ' + params.model);
+				if(params.onClick) {
+					mesh.onClick = params.onClick;
 				}
+				if(params.onLook) {
+					mesh.onLook = params.onLook;
+				}
+				// Force aniamation if animate is set to true (useful for debugging)
+				if(params.animate === true || (params.animate === undefined && mesh.geometry.animations)) {
+					if(!mesh.geometry.animations) {
+						reject(new Error('No animations set for model ' + params.model));
+					}
 				
-				animation = new THREE.Animation(mesh, mesh.geometry.animations[0]);
-				animation.play();
-			}
+					animation = new THREE.Animation(mesh, mesh.geometry.animations[0]);
+					animation.play();
+				}
 		
-			_this.sceneCube.add(mesh);
-			_this.objects.push(mesh);
+				_this.sceneCube.add(mesh);
+				_this.objects.push(mesh);
+				
+				resolve(mesh);
+			});
 		});
 	};
 	
