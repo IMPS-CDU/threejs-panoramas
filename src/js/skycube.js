@@ -500,6 +500,40 @@
 	};
 	
 	/**
+	* Add a THREEJS object into the skybox with the given texture.
+	* Currently doesn't handle textures or animations.
+	* @param mesh Path to the object in JSON Object format
+	* @param x X coordinate for the image
+	* @param y Y coordinate for the image
+	* @param z z coordinate for the image
+	**/
+	p.addObject = function(params) {
+		var
+			_this = this,
+			x = params.x || 0,
+			y = params.y || 0,
+			z = params.z || 0,
+			loader = new THREE.ObjectLoader();
+			
+			return new Promise(function(resolve, reject) {
+				if(!params.model) {
+					reject(new Error('No model set'));
+				}
+				
+				loader.load(params.model, function(obj) {
+					obj.position.x = x;
+					obj.position.y = y;
+					obj.position.z = z;
+					
+					_this.sceneCube.add(obj);
+					_this.objects.push(obj);
+				
+					resolve(obj);
+				});
+			});
+	};
+	
+	/**
 	* Add a 3d object into the skybox with the given texture
 	* @param mesh Path to the object in JSON Geometry format
 	* @param textureImage Path to the texture image (note that dimensions must be base 2)
@@ -527,11 +561,8 @@
 		y = params.y || 0;
 		z = params.z || 0;
 		
-		if(params.obj) {
-			loader = new THREE.ObjectLoader();
-		} else {
-			loader = new THREE.JSONLoader();
-		}
+		loader = new THREE.JSONLoader();
+		
 		return new Promise(function(resolve, reject) {
 			loader.load(params.model, function( geometry ) {
 				var
