@@ -127,12 +127,21 @@
 	p.webgl = false;
 	
 	/**
+	* Should the lookat event be fired for all objects in front of us.
+	* i.e. should we look through the first objects to those behind them
+	* @name lookThrough
+	* @type boolean
+	* @memberof SkyCube
+	**/
+	p.lookThrough = false;
+	
+	/**
 	* Target of current hover event - used to determine if hover has changed when triggering events
 	* @name hoverTarget
 	* @type THREE.Object
 	* @memberof SkyCube
 	**/
-	p.hoverTarget = null;
+	p.hoverTargets = null;
 	/**
 	* Javascript event to dispatch when the mouse is moved over an object
 	* @name mouseOnEvt
@@ -151,7 +160,7 @@
 	* @type THREE.Object
 	* @memberof SkyCube
 	**/
-	p.lookTarget = null;
+	p.lookTargets = [];
 	/**
 	* Javascript event to dispatch when the camera looks directly at an object (the object is centered in the camera's field of view)
 	* @name lookAtEvt
@@ -317,6 +326,10 @@
 		
 		if(params.hoverEnabled !== false) {
 			this.enableHover();
+		}
+		
+		if(params.lookThough) {
+			this.lookThrough = params.lookThrough;
 		}
 		
 		if(params.lookEnabled !== false) {
@@ -895,18 +908,41 @@
 		vector.applyQuaternion(this.cameraCube.quaternion);
 		var ray = new THREE.Raycaster(this.cameraCube.position, vector);
 		var intersects = ray.intersectObjects(this.objects);
-		if(intersects.length > 0) {
-			if(intersects[0].object !== this.hoverTarget) {
-				if(this.lookTarget) {
-					this.lookTarget.dispatchEvent(lookOffEvt);
+		if(this.lookThrough) {
+			// look through and trigger each and every object we are looking at even if it is hidden behind another
+			var newMatches = [];
+			intersects.forEach(function(object) {
+				var oldIndex = this.lookTargets.indexOf(object);
+				if(oldIndex === -1) {
+					// New so fire event
+					object.dispatchEvent(lookAtEvt);
+				} else {
+					// Old so remove from old list to check what's left
+					this.lookTargets.splice(oldIndex, 1);
 				}
-				this.lookTarget = intersects[0].object;
-				this.lookTarget.dispatchEvent(lookAtEvt);
-			}
+				newMatches.push(object);
+			});
+			// Anything left in lookTargets is no longer being looked at so cool lookOff
+			this.lookTargets.forEach(function(object) {
+				object.dispatchEvent(lookOffEvt);
+			});
+			// Replace with the new list
+			this.lookTargets = newMatches;
 		} else {
-			if(this.lookTarget) {
-				this.lookTarget.dispatchEvent(lookOffEvt);
-				this.lookTarget = null;
+			// Just look at the first object
+			if(intersects.length > 0) {
+				if(intersects[0].object !== this.lookTargets[0]) {
+					if(this.lookTargets.length > 0) {
+						this.lookTargets[0].dispatchEvent(lookOffEvt);
+					}
+					this.lookTargets[0] = intersects[0].object;
+					this.lookTargets[0].dispatchEvent(lookAtEvt);
+				}
+			} else {
+				if(this.lookTargets.length > 0) {
+					this.lookTargets[0].dispatchEvent(lookOffEvt);
+					this.lookTargets.pop();
+				}
 			}
 		}
 	};
