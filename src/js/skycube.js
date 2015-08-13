@@ -540,6 +540,35 @@
 			});
 	};
 	
+	p.addObjMtl = function(params) {
+		var
+			_this = this,
+			x = params.x || 0,
+			y = params.y || 0,
+			z = params.z || 0,
+			loader = new THREE.OBJMTLLoader();
+			if(!params.obj) {
+				throw new Error('No obj file specified');
+			}
+			if(!params.mtl) {
+				throw new Error('No MTL file specified');
+			}
+			return new Promise(function(resolve, reject) {
+				loader.load(params.obj, params.mtl, function(object) {
+					object.position.x = x;
+					object.position.y = y;
+					object.position.z = z;
+					
+					_this.sceneCube.add(object);
+					_this.objects.push(object);
+					
+					resolve(object);
+				}, function() {}, function(xhr) {
+					reject(xhr);
+				});
+			});
+	};
+	
 	/**
 	* Add a 3d object into the skybox with the given texture
 	* @param mesh Path to the object in JSON Geometry format
@@ -642,6 +671,14 @@
 				}
 				if(params.z) {
 					dae.position.z = params.z;
+				}
+
+				if(params.rotation) {
+					dae.rotation.x = params.rotation.x || 0;
+					dae.rotation.y = params.rotation.y || 0;
+					dae.rotation.z = params.rotation.z || 0;
+				} else {
+					dae.lookAt(_this.cameraCube.position);
 				}
 			
 				dae.updateMatrix();
