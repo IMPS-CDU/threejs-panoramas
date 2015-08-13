@@ -438,7 +438,14 @@
 		plane.position.x = x;
 		plane.position.y = y;
 		plane.position.z = z;
-		plane.lookAt(this.cameraCube.position);
+		
+		if(params.rotation) {
+			plane.rotation.x = params.rotation.x || 0;
+			plane.rotation.y = params.rotation.y || 0;
+			plane.rotation.z = params.rotation.z || 0;
+		} else {
+			plane.lookAt(this.cameraCube.position);
+		}
 		
 		
 		if(params.onClick) {
