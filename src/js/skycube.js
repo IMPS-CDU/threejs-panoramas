@@ -571,6 +571,14 @@
 					object.position.x = x;
 					object.position.y = y;
 					object.position.z = z;
+
+					if(params.rotation) {
+						object.rotation.x = params.rotation.x || 0;
+						object.rotation.y = params.rotation.y || 0;
+						object.rotation.z = params.rotation.z || 0;
+					} else {
+						object.lookAt(_this.cameraCube.position);
+					}
 					
 					_this.sceneCube.add(object);
 					_this.objects.push(object);
