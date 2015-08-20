@@ -147,7 +147,7 @@
 	* @name mouseOnEvt
 	* @type Event
 	**/
-	var mouseOnEvt = new Event('mouseon');
+	var mouseOnEvt = new Event('mouseover');
 	/**
 	* Javascript event to dispatch when the mouse is moved off an object
 	* @name mouseOutEvt
@@ -462,10 +462,10 @@
 		
 		
 		if(params.onClick) {
-			plane.onClick = params.onClick;
+			plane.addEventListener('click', params.onClick);
 		}
 		if(params.onHover) {
-			plane.addEventListener('mouseon', params.onHover);
+			plane.addEventListener('mouseover', params.onHover);
 		}
 		if(params.hoverOff) {
 			plane.addEventListener('mouseout', params.hoverOff);
@@ -795,7 +795,7 @@
 		// add it to the standard (WebGL) scene
 		this.sceneCube.add(cssObject);
 		this.cssScene.add(cssObject);
-		
+
 		return cssObject;
 	};
 
@@ -859,10 +859,7 @@
 
 		intersects = ray.intersectObjects(this.objects);
 		if(intersects.length > 0){
-			if(intersects[0].object.onClick) {
-				event.object = intersects[0].object;
-				intersects[0].object.onClick.call(this, event);
-			}
+			intersects[0].object.dispatchEvent({type: 'click'});
 		} else if(this.clickNothing) {
 			this.clickNothing(event);
 		}
@@ -909,6 +906,7 @@
 	/**
 	* Event called on camera move to detect if the camera is looking directly at an object. 
 	* Draws a vector from the camera and checks if it intersects with any objects. If it does it calls the onLook function on the first object. If no objects are found it calls the lookNowhere event if set
+	* Please note that this does not currently locate CSS objects.
 	* @param event DOM event for mouse move
 	**/
 	p.onLookAt = function() {
@@ -916,6 +914,7 @@
 		vector.applyQuaternion(this.cameraCube.quaternion);
 		var ray = new THREE.Raycaster(this.cameraCube.position, vector);
 		var intersects = ray.intersectObjects(this.objects);
+
 		if(this.lookThrough) {
 			// look through and trigger each and every object we are looking at even if it is hidden behind another
 			var newMatches = [];
