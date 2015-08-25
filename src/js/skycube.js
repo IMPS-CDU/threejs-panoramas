@@ -402,6 +402,25 @@
 	};
 	
 	/**
+	* UnBind event handlers to controllers
+	* @function off
+	* @param eventType String event type currently bound
+	* @param callack bound function to remove
+	**/
+	p.off = function(eventType, callback) {
+		switch (eventType) {
+		case 'change': 
+			this.controls.removeEventListener(eventType, callback);
+			break;
+		case 'click':
+			this.controls.removeEventListener('end', callback);
+			break;
+		default:
+			throw new Error('Unkown event: ' + eventType);
+		}
+	}
+	
+	/**
 	* Event fired when window is resized to scale the skycube
 	* @TODO: Try this using the div dimensions this.container.clientWidht and this.container.clientHeight
 	* @function onWindowResize
