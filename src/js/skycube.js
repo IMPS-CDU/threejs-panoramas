@@ -320,7 +320,7 @@
 
 		window.addEventListener('resize', this.onWindowResize.bind(this), false);
 		this.cssRenderer.domElement.addEventListener('mousedown', this.onMouseDown.bind(this), false);
-		this.cssRenderer.domElement.addEventListener('touchstart', this.onClick.bind(this), false);
+		this.cssRenderer.domElement.addEventListener('touchstart', this.onMouseDown.bind(this), false);
 		this.clickNothing = params.clickNothing;
 		this.controls.addEventListener('change', this.render.bind(this));
 		
@@ -895,8 +895,10 @@
 					this.clickNothing(event);
 				}
 				document.body.removeEventListener('mouseup', mouseUpFunc, false);
+				document.body.removeEventListener('touchend', mouseUpFunc, false);
 			}).bind(this);
 			document.body.addEventListener('mouseup', mouseUpFunc, false);
+			document.body.addEventListener('touchend', mouseUpFunc, false);
 		}
 	};
 	
