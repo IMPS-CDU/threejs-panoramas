@@ -319,7 +319,7 @@
 		this.controls = new THREE.OrbitControls(this.camera, this.cssRenderer.domElement);
 
 		window.addEventListener('resize', this.onWindowResize.bind(this), false);
-		this.cssRenderer.domElement.addEventListener('click', this.onClick.bind(this), false);
+		this.cssRenderer.domElement.addEventListener('mousedown', this.onMouseDown.bind(this), false);
 		this.cssRenderer.domElement.addEventListener('touchstart', this.onClick.bind(this), false);
 		this.clickNothing = params.clickNothing;
 		this.controls.addEventListener('change', this.render.bind(this));
@@ -418,7 +418,7 @@
 		default:
 			throw new Error('Unkown event: ' + eventType);
 		}
-	}
+	};
 	
 	/**
 	* Event fired when window is resized to scale the skycube
@@ -859,28 +859,44 @@
 	};
 	
 	/**
-	* On click event used to call click events for objects.
-	* Checks the the cursor intersects with any objects and if so calls onClick on them. If no objects are found clickNothing is called if set.
-	* @param event DOM event for mouse click
-	**/
-	p.onClick = function(event){
+	* Get array of objects under the mouse cursor
+	* @return Array of ThreeJS objects under mouse
+	*/
+	p.getObjectsUnderMouse = function() {
 		var 
 			mouse,
 			vector,
 			ray,
 			intersects;
-			
+		
 		mouse = new THREE.Vector3((event.clientX / window.innerWidth ) * 2 - 1, -( event.clientY / window.innerHeight ) * 2 + 1, 1);
-	
+
 		vector = new THREE.Vector3( mouse.x, mouse.y, 1 );
 		vector.unproject(this.cameraCube);
 		ray = new THREE.Raycaster(this.cameraCube.position, vector.sub(this.cameraCube.position).normalize());
 
 		intersects = ray.intersectObjects(this.objects);
-		if(intersects.length > 0){
-			intersects[0].object.dispatchEvent({type: 'click'});
-		} else if(this.clickNothing) {
-			this.clickNothing(event);
+		return intersects;
+	};
+	
+	/**
+	* As click on the canvas doesn't guarantee the same start/stop point get the objects we intersect on mouse down and bind a mouseup event to check if they match.
+	* If the mousedown and mouseup are on the same object dispatch click on that object
+	* @param event DOM event for mouse click
+	**/
+	p.onMouseDown = function() {
+		var intersectsDown = this.getObjectsUnderMouse();
+		if(intersectsDown.length > 0) {
+			var mouseUpFunc = (function(event) {
+				var intersectsUp = this.getObjectsUnderMouse();
+				if(intersectsUp.length > 0 && intersectsUp[0].object === intersectsDown[0].object) {
+					intersectsUp[0].object.dispatchEvent({type: 'click'});
+				} else if(this.clickNothing){
+					this.clickNothing(event);
+				}
+				document.body.removeEventListener('mouseup', mouseUpFunc, false);
+			}).bind(this);
+			document.body.addEventListener('mouseup', mouseUpFunc, false);
 		}
 	};
 	
