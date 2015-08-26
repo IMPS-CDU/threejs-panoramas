@@ -376,7 +376,7 @@
 	**/
 	p.disableLookAt = function() {
 		if(this.listeners.lookAt) {
-			this.controls.addEventListener('change', this.listeners.lookAt, false);
+			this.controls.removeEventListener('change', this.listeners.lookAt, false);
 			this.listeners.lookAt = null;
 		}
 	};
