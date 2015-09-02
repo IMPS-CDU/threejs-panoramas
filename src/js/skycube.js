@@ -234,7 +234,7 @@
 
 		// Create the cameras and scene
 		this.camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, boxSize );
-		this.camera.position.z = 3200;
+		//		this.camera.position.z = 3200;	// wtf is this for?
 		this.cameraCube = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, boxSize );
 		this.scene = new THREE.Scene();
 		this.sceneCube = new THREE.Scene();
@@ -841,7 +841,7 @@
 		THREE.AnimationHandler.update(delta);
 
 		this.renderer.render(this.sceneCube, this.cameraCube );
-		this.renderer.render(this.scene, this.camera );
+//		this.renderer.render(this.scene, this.camera );
 
 		this.cssRenderer.render(this.cssScene, this.cameraCube);
 	};
@@ -862,7 +862,7 @@
 	* Get array of objects under the mouse cursor
 	* @return Array of ThreeJS objects under mouse
 	*/
-	p.getObjectsUnderMouse = function() {
+	p.getObjectsUnderMouse = function(event) {
 		var 
 			mouse,
 			vector,
@@ -884,11 +884,11 @@
 	* If the mousedown and mouseup are on the same object dispatch click on that object
 	* @param event DOM event for mouse click
 	**/
-	p.onMouseDown = function() {
-		var intersectsDown = this.getObjectsUnderMouse();
+	p.onMouseDown = function(downEvent) {
+		var intersectsDown = this.getObjectsUnderMouse(downEvent);
 		if(intersectsDown.length > 0) {
-			var mouseUpFunc = (function(event) {
-				var intersectsUp = this.getObjectsUnderMouse();
+			var mouseUpFunc = (function(upEvent) {
+				var intersectsUp = this.getObjectsUnderMouse(upEvent);
 				if(intersectsUp.length > 0 && intersectsUp[0].object === intersectsDown[0].object) {
 					intersectsUp[0].object.dispatchEvent({type: 'click'});
 				} else if(this.clickNothing){
