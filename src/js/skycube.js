@@ -864,12 +864,14 @@
 	*/
 	p.getObjectsUnderMouse = function(event) {
 		var 
+			xCoord = event.clientX || event.changedTouches[0].clientX,
+			yCoord = event.clientY || event.changedTouches[0].clientY,
 			mouse,
 			vector,
 			ray,
 			intersects;
-		
-		mouse = new THREE.Vector3((event.clientX / window.innerWidth ) * 2 - 1, -( event.clientY / window.innerHeight ) * 2 + 1, 1);
+
+		mouse = new THREE.Vector3((xCoord / window.innerWidth ) * 2 - 1, -( yCoord / window.innerHeight ) * 2 + 1, 1);
 
 		vector = new THREE.Vector3( mouse.x, mouse.y, 1 );
 		vector.unproject(this.cameraCube);
