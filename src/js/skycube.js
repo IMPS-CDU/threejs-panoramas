@@ -811,7 +811,7 @@
 
 		this.sceneCube.add(cssObject);
 		planeMaterial = new THREE.MeshBasicMaterial({color: 0x000000, opacity: 0.1, side: THREE.DoubleSide });
-		planeGeometry = new THREE.PlaneGeometry( planeWidth, planeHeight );
+		planeGeometry = new THREE.PlaneBufferGeometry( planeWidth, planeHeight );
 		planeMesh = new THREE.Mesh( planeGeometry, planeMaterial );
 		planeMesh.position.y += planeHeight / 2;
 		// add it to the standard (WebGL) scene
