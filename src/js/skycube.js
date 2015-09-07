@@ -464,6 +464,9 @@
 		}
 
 		texture = THREE.ImageUtils.loadTexture( image );
+		if ( texture.minFilter !== THREE.NearestFilter && texture.minFilter !== THREE.LinearFilter ) {
+			texture.minFilter = THREE.NearestFilter;
+		}
 		material = new THREE.MeshBasicMaterial({ map: texture, transparent: true});
 		plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(width, height), material);
 
