@@ -273,7 +273,7 @@
 		}
 		material = new THREE.MeshFaceMaterial(materialArray);
 		*/
-		textureCube = THREE.ImageUtils.loadTextureCube(urls);
+		textureCube = THREE.ImageUtils.loadTextureCube(urls, undefined, params.loaded, params.error);
 
 		shader = THREE.ShaderLib.cube;
 		shader.uniforms.tCube.value = textureCube;
