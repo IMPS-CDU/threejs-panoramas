@@ -43,8 +43,7 @@
 			var type = this.selectType.options[this.selectType.selectedIndex].value;
 
 			fields.forEach((function(fieldName) {
-				target[type][fieldName] = this.inputs[fieldName].value;
-				console.log('Set ' + type + ' ' + fieldName + ' to ' + this.inputs[fieldName].value);
+				target[type][fieldName] = parseInt(this.inputs[fieldName].value, 10);
 			}).bind(this));
 			if(lookAt) {
 				target.lookAt(lookAt);
