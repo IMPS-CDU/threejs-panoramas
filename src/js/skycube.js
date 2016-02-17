@@ -1,30 +1,34 @@
-/*jslint  white: true, browser: true, plusplus: true, nomen: true */
+/*eslint max-statements: 0, no-magic-numbers: 0, no-param-reassign: 0 */
 /*global THREE, requestAnimationFrame, console */
 
 /**
 * Maybe handle touch events using tocca http://gianlucaguarini.github.io/Tocca.js/
 **/
-(function() {
+(function() { //eslint-disable-line max-statements
 	'use strict';
-	
-	var SkyCube = function(params) {
+
+	/**
+	* Create a new skybox object
+	* @param {Object} params Configuraton settings for this skycube (see init function for options)
+	* @returns {SkyCube} SkyCube instance
+	**/
+	function SkyCube(params) {
 		this.init(params);
-	};
+	}
 	window.SkyCube = SkyCube;
-	var p = SkyCube.prototype;
-	
+
 	var defaultBoxSegments = 14; // The number of segments in each dimension of the skybox geometry (lower values can cause warping)
 	var defaultBoxDimensions = 300;	// The dimensions of the box to draw
-	
+
 	// Public Properties
-	
+
 	/**
 	 * Array of images to show on skycube
 	 * @name images
 	 * @type Object
 	 * @memberof SkyCube
 	 **/
-	p.images = null;
+	SkyCube.prototype.images = null;
 
 	/**
 	 * ID for div to contain skycube
@@ -32,7 +36,7 @@
 	 * @type String
 	 * @memberof SkyCube
 	 **/
-	p.parentId = null;
+	SkyCube.prototype.parentId = null;
 
 	/**
 	 * Dom element for parent div to hold skycube
@@ -40,55 +44,55 @@
 	 * @type DomElement
 	 * @memberof SkyCube
 	 **/
-	p.container = null;
-	
+	SkyCube.prototype.container = null;
+
 	/**
 	 * Camera used to render user view (I think)
 	 * @name camera
 	 * @type THREE.PerspectiveCamera
 	 * @memberof SkyCube
 	 **/
-	p.camera = null;
-	
+	SkyCube.prototype.camera = null;
+
 	/**
 	 * Camera used to render cube (I think)
 	 * @name camera
 	 * @type THREE.PerspectiveCamera
 	 * @memberof SkyCube
 	 **/
-	p.cameraCube = null;
-	
+	SkyCube.prototype.cameraCube = null;
+
 	/**
 	 * Scene used to render user view
 	 * @name camera
 	 * @type THREE.Scene
 	 * @memberof SkyCube
 	 **/
-	p.scene = null;
-	
+	SkyCube.prototype.scene = null;
+
 	/**
 	 * Scene used to render user view
 	 * @name camera
 	 * @type THREE.Scene
 	 * @memberof SkyCube
 	 **/
-	p.sceneCube = null;
-	
+	SkyCube.prototype.sceneCube = null;
+
 	/**
 	 * Skybox mesh to render the cube
 	 * @name mesh
 	 * @type THREE.Mesh
 	 * @memberof SkyCube
 	 **/
-	p.mesh = null;
-	
+	SkyCube.prototype.mesh = null;
+
 	/**
 	 * WebGL Renderer
 	 * @name renderer
 	 * @type THREE.WebGLRenderer
 	 * @memberof SkyCube
 	 **/
-	p.renderer = null;
+	SkyCube.prototype.renderer = null;
 
 	/**
 	* Array of objects to be raytraced when evaluating if the user has clicked on an object
@@ -96,11 +100,11 @@
 	* @type Array
 	* @memberof SkyCube
 	**/
-	p.objects = [];
-	
-	p.animations = [];
-	
-	p.clock = null;
+	SkyCube.prototype.objects = [];
+
+	SkyCube.prototype.animations = [];
+
+	SkyCube.prototype.clock = null;
 
 	/**
 	* Scene for CSS elements
@@ -108,24 +112,24 @@
 	* @type THREE.Scene
 	* @memberof SkyCube
 	**/
-	p.cssScene = null;
-	
+	SkyCube.prototype.cssScene = null;
+
 	/**
 	 * CSS 3D Renderer
 	 * @name cssRenderer
 	 * @type THREE.CSS3DRendeter
 	 * @memberof SkyCube
 	 **/
-	p.cssRenderer = null;
-	
-	p.zoomable = false;
-	
-	p.maxZoom = 20;
-	
-	p.minZoom = 80;
-	
-	p.webgl = false;
-	
+	SkyCube.prototype.cssRenderer = null;
+
+	SkyCube.prototype.zoomable = false;
+
+	SkyCube.prototype.maxZoom = 20;
+
+	SkyCube.prototype.minZoom = 80;
+
+	SkyCube.prototype.webgl = false;
+
 	/**
 	* Should the lookat event be fired for all objects in front of us.
 	* i.e. should we look through the first objects to those behind them
@@ -133,61 +137,103 @@
 	* @type boolean
 	* @memberof SkyCube
 	**/
-	p.lookThrough = false;
-	
+	SkyCube.prototype.lookThrough = false;
+
 	/**
 	* Target of current hover event - used to determine if hover has changed when triggering events
 	* @name hoverTarget
 	* @type THREE.Object
 	* @memberof SkyCube
 	**/
-	p.hoverTargets = null;
+	SkyCube.prototype.hoverTargets = null;
+
 	/**
 	* Javascript event to dispatch when the mouse is moved over an object
 	* @name mouseOnEvt
 	* @type Event
 	**/
 	var mouseOnEvt = new Event('mouseover');
+
 	/**
 	* Javascript event to dispatch when the mouse is moved off an object
 	* @name mouseOutEvt
 	* @type Event
 	**/
 	var mouseOutEvt = new Event('mouseout');
+
 	/**
 	* Target of current look event - used to determine if hover has changed when triggering events
 	* @name lookTarget
 	* @type THREE.Object
 	* @memberof SkyCube
 	**/
-	p.lookTargets = [];
+	SkyCube.prototype.lookTargets = [];
+
 	/**
 	* Javascript event to dispatch when the camera looks directly at an object (the object is centered in the camera's field of view)
 	* @name lookAtEvt
 	* @type Event
 	**/
 	var lookAtEvt = new Event('lookat');
+
 	/**
 	* Javascript event to dispatch when the camera no longer looks directly at an object (it may still be visible in the camera however)
 	* @name lookAtEvt
 	* @type Event
 	**/
 	var lookOffEvt = new Event('lookoff');
+
 	/**
 	* Object holding event listeners for skybox so they can be disabled if required
 	* @name listeners
 	* @type Object
 	* @memberof SkyCube
 	**/
-	p.listeners = {};
+	SkyCube.prototype.listeners = {};
+
+	/**
+	* Base speed to move camera when rotating/panning
+	* @name baseSpeed
+	* @type number
+	* @memberof SkyCube
+	**/
+	SkyCube.prototype.baseSpeed = 20;
+
+	/**
+	* Base radius of circle when rotating
+	* @name baseRadius
+	* @type number
+	* @memberof SkyCube
+	**/
+	SkyCube.prototype.baseRadius = 200;
+
+	/**
+	* Flag indicating if the camera if currently panning/rotating
+	* @name panning
+	* @type Boolean
+	* @memberof SkyCube
+	**/
+	SkyCube.prototype.panning = false;
+
+	/**
+	* Centre of the circle to rotate around
+	* @name rotateCentre
+	* @type THREE.Vector3
+	* @memberof SkyCube
+	**/
+	SkyCube.prototype.rotateCentre = null;
 
 
+	/**
+	 * Check if webgl is avilable in the browser
+	 * @returns {Boolean} true if webgl is available otherwise false
+	 **/
 	function webglAvailable() {
 		try {
 			var canvas = document.createElement( 'canvas' );
-			return !!( window.WebGLRenderingContext && (
-				canvas.getContext( 'webgl' ) ||
-				canvas.getContext( 'experimental-webgl' ) )
+			return Boolean( window.WebGLRenderingContext && (
+				canvas.getContext( 'webgl' )
+				|| canvas.getContext( 'experimental-webgl' ) )
 			);
 		} catch ( e ) {
 			return false;
@@ -197,22 +243,32 @@
 	/**
 	* Initalise a new skycube
 	* Requires the following paramsters:
-	*   parentId: The id for DOM element to contain the skycube
-	*   images: Object containing image paths for panorama. The following must be set: right, left, top, button, front and back
 	* Note that IOS Safari refuses to load skycube images over 1024x1024
 	* @function init
-	* @param params An object containing images and parentId for the skycube. 
+	* @param {Object} params An object containing images and parentId for the skycube.
+	* @param {string} params.parentId The id for DOM element to contain the skycube
+	* @param {Object} params.images Image paths for panorama.
+	* @param {string} params.images.right path for image to display on right of skybox
+	* @param {string} params.images.left path for image to display on left of skybox
+	* @param {string} params.images.top path for image to display on top of skybox
+	* @param {string} params.images.bottom path for image to display on the bottom of the skybox
+	* @param {string} params.images.front path for image to display on the front of the skybox
+	* @param {string} params.images.back path for image to display on the back of the skybox
+	* @param {Boolean} params.reverse Should the skybox be reversed (used of floor and roof have been generated backwards)
+	* @param {Function} params.loaded Callback when the cube has been loaded
+	* @param {Function} params.error Callback if an error occurrs loading the cube
+	*
 	* @throws Error if parentId or images are not set
-	* @memberof Skycube
+	* @returns {null} no return value
 	*/
-	p.init = function(params) {
-		var 
-			urls,
-			textureCube,
-			material,
-			shader,
-			boxSize = 100000;
-		
+	SkyCube.prototype.init = function(params) {
+		var urls = null;
+		var textureCube = null;
+		var material = null;
+		var shader = null;
+		var boxSize = 100000;
+		var fov = 60;
+
 		if(!params.parentId) {
 			throw new Error('parentId is not set');
 		}
@@ -222,10 +278,10 @@
 		if(!params.images.right || !params.images.left || !params.images.top || !params.images.bottom || !params.images.front || !params.images.back) {
 			throw new Error('Missing images. Ensure images are set for right, left, top, bottom, front and back');
 		}
-		
+
 		this.container = document.createElement( 'div' );
 		document.body.appendChild( this.container );
-		
+
 		this.parentId = params.parentId;
 		this.container = document.getElementById(this.parentId);
 		this.images = params.images;
@@ -233,16 +289,15 @@
 		this.clock = new THREE.Clock();
 
 		// Create the cameras and scene
-		this.camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, boxSize );
-		//		this.camera.position.z = 3200;	// wtf is this for?
-		this.cameraCube = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, boxSize );
+		this.camera = new THREE.PerspectiveCamera( fov, window.innerWidth / window.innerHeight, 1, boxSize );
+		this.cameraCube = new THREE.PerspectiveCamera( fov, window.innerWidth / window.innerHeight, 1, boxSize );
 		this.scene = new THREE.Scene();
 		this.sceneCube = new THREE.Scene();
-		
+
 		// Make the skycube
-		// Early versions built the cube in reverse. To avoid breaking anything using those versions you must explicitly state it is not reversed. 
+		// Early versions built the cube in reverse. To avoid breaking anything using those versions you must explicitly state it is not reversed.
 		// It is recommended that those applications start setting the flag to true however as the default will change in a future update
-		if(params.reverse === false) {
+		if(params.reverse !== false) {
 			urls = [
 				this.images.left,
 				this.images.right,
@@ -261,7 +316,7 @@
 				this.images.back
 			];
 		}
-		
+
 		/* This block replaces the following and will work with canvanRenderer (although IE still fails) BUT it inverts the images
 		var materialArray = [];
 		for(var i = 0; i < urls.length; i++) {
@@ -273,7 +328,7 @@
 		}
 		material = new THREE.MeshFaceMaterial(materialArray);
 		*/
-		textureCube = THREE.ImageUtils.loadTextureCube(urls, undefined, params.loaded, params.error);
+		textureCube = THREE.ImageUtils.loadTextureCube(urls, null, params.loaded, params.error);
 
 		shader = THREE.ShaderLib.cube;
 		shader.uniforms.tCube.value = textureCube;
@@ -287,7 +342,7 @@
 			side: THREE.BackSide
 
 		} );
-		
+
 		// Note that the mesh needs width/height/depth segmets set to a value like 7 for canvas renderer to avoid warping
 		var boxDimensions = params.boxDimensions || defaultBoxDimensions;
 		var boxSegments = params.boxSegments || defaultBoxSegments;
@@ -300,6 +355,7 @@
 		} else {
 			this.renderer = new THREE.CanvasRenderer();
 		}
+
 		// This makes it a bit more version safe
 		if(this.renderer.setPixelRatio) {
 			this.renderer.setPixelRatio( window.devicePixelRatio );
@@ -323,37 +379,43 @@
 		this.cssRenderer.domElement.addEventListener('touchstart', this.onMouseDown.bind(this), false);
 		this.clickNothing = params.clickNothing;
 		this.controls.addEventListener('change', this.render.bind(this));
-		
+
 		if(params.hoverEnabled !== false) {
 			this.enableHover();
 		}
-		
+
 		if(params.lookThough) {
 			this.lookThrough = params.lookThrough;
 		}
-		
+
 		if(params.lookEnabled !== false) {
 			this.enableLookAt();
 		}
-		
-		
+
+
 		if(params.zoomable) {
 			this.cssRenderer.domElement.addEventListener('mousewheel', this.onMouseWheel.bind(this), false);
 		}
+		this.lookAt(this.getPointInFront(200)); // Controls don't work if we don't first set them
 	};
 
 	/**
 	* Enable hover events for skybox objects (I don't *think* it will have a significant performance impact)
+	* @function enableHover
+	* @returns {SkyCube} the current instance
 	**/
-	p.enableHover = function() {
+	SkyCube.prototype.enableHover = function() {
 		this.listeners.mousemove = this.cssRenderer.domElement.addEventListener('mousemove', this.onMouseMove.bind(this), false);
 		this.listeners.touchmove = this.cssRenderer.domElement.addEventListener('touchmove', this.onMouseMove.bind(this), false);
+		return this;
 	};
-	
+
 	/**
-	* Disable hover events for skybox objects (just in case I'm wrong about the performenace) 
+	* Disable hover events for skybox objects (just in case I'm wrong about the performenace)
+	* @function disableHover
+	* @returns {SkyCube} the current instance
 	**/
-	p.disableHover = function() {
+	SkyCube.prototype.disableHover = function() {
 		if(this.listeners.mousemove) {
 			this.cssRenderer.domElement.removeEventListener('mousemove', this.listeners.mousemove, false);
 			this.listiners.mousemove = null;
@@ -362,35 +424,43 @@
 			this.cssRenderer.domElement.removeEventListener('touchmove', this.listeners.touchmove, false);
 			this.listiners.touchmove = null;
 		}
+		return this;
 	};
-	
+
 	/**
 	* Enable lookat and lookoff events for skybox objects
+	* @function enableLookAt
+	* @returns {SkyCube} the current instance
 	**/
-	p.enableLookAt = function() {
+	SkyCube.prototype.enableLookAt = function() {
 		this.listeners.lookAt = this.controls.addEventListener('change', this.onLookAt.bind(this), false);
+		return this;
 	};
-	
+
 	/**
 	* Disable lookat and lookoff events for skybox objects (just in case there is a performance hit)
+	* @function disableLookAt
+	* @returns {SkyCube} the current instance
 	**/
-	p.disableLookAt = function() {
+	SkyCube.prototype.disableLookAt = function() {
 		if(this.listeners.lookAt) {
 			this.controls.removeEventListener('change', this.listeners.lookAt, false);
 			this.listeners.lookAt = null;
 		}
+		return this;
 	};
-	
-	
+
+
 	/**
 	* Bind event handlers to controllers
 	* @function on
-	* @param eventType String event type to handle
-	* @param callack function to call when event is triggered
+	* @param {string} eventType String event type to handle
+	* @param {Function} callback function to call when event is triggered
+	* @returns {SkyCube} the current instance
 	**/
-	p.on = function(eventType, callback) {
+	SkyCube.prototype.on = function(eventType, callback) {
 		switch (eventType) {
-		case 'change': 
+		case 'change':
 			this.controls.addEventListener(eventType, callback);
 			break;
 		case 'click':
@@ -399,17 +469,19 @@
 		default:
 			throw new Error('Unkown event: ' + eventType);
 		}
+		return this;
 	};
-	
+
 	/**
 	* UnBind event handlers to controllers
 	* @function off
-	* @param eventType String event type currently bound
-	* @param callack bound function to remove
+	* @param {string} eventType String event type currently bound
+	* @param {Function} callback bound function to remove
+	* @returns {SkyCube} the current instance
 	**/
-	p.off = function(eventType, callback) {
+	SkyCube.prototype.off = function(eventType, callback) {
 		switch (eventType) {
-		case 'change': 
+		case 'change':
 			this.controls.removeEventListener(eventType, callback);
 			break;
 		case 'click':
@@ -418,15 +490,17 @@
 		default:
 			throw new Error('Unkown event: ' + eventType);
 		}
+		return this;
 	};
-	
+
 	/**
 	* Event fired when window is resized to scale the skycube
+	* @function onWindowResize
 	* @TODO: Try this using the div dimensions this.container.clientWidht and this.container.clientHeight
 	* @function onWindowResize
-	* @memberof Skycube
+	* @returns {SkyCube} the current instance
 	*/
-	p.onWindowResize = function() {
+	SkyCube.prototype.onWindowResize = function() {
 
 		this.camera.aspect = window.innerWidth / window.innerHeight;
 		this.camera.updateProjectionMatrix();
@@ -436,29 +510,31 @@
 
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
 		this.cssRenderer.setSize(window.innerWidth, window.innerHeight);
+		return this;
 	};
-	
-	
+
+
 	/**
 	* Add a bitmap image into the skybox on a flat plane facing the player
-	* @param params.image Path to the image to display
-	* @param params.x X coordinate for the image
-	* @param params.y Y coordinate for the image
-	* @param params.z z coordinate for the image
-	* @return The plane this image is placed on
+	* @function addImage
+	* @param {Object} params Configuration object for image
+	* @param {string} params.image Path to the image to display
+	* @param {number} params.x X coordinate for the image
+	* @param {number} params.y Y coordinate for the image
+	* @param {number} params.z z coordinate for the image
+	* @return {THREE.Mesh} The plane this image is placed on
 	**/
-	p.addImage = function(params) {
-		var
-			image = params.image,
-			x = params.x || 0,
-			y = params.y || 0,
-			z = params.z || 0,
-			width = params.width || 10,
-			height = params.height || 10,
-			texture,
-			material,
-			plane;
-			
+	SkyCube.prototype.addImage = function(params) {
+		var image = params.image;
+		var x = params.x || 0;
+		var	y = params.y || 0;
+		var	z = params.z || 0;
+		var width = params.width || 10;
+		var height = params.height || 10;
+		var texture = null;
+		var material = null;
+		var plane = null;
+
 		if(!image) {
 			throw new Error('Unable to add image: Image path is not set');
 		}
@@ -473,7 +549,7 @@
 		plane.position.x = x;
 		plane.position.y = y;
 		plane.position.z = z;
-		
+
 		if(params.rotation) {
 			plane.rotation.x = params.rotation.x || 0;
 			plane.rotation.y = params.rotation.y || 0;
@@ -481,8 +557,8 @@
 		} else {
 			plane.lookAt(this.cameraCube.position);
 		}
-		
-		
+
+
 		if(params.onClick) {
 			plane.addEventListener('click', params.onClick);
 		}
@@ -492,36 +568,37 @@
 		if(params.hoverOff) {
 			plane.addEventListener('mouseout', params.hoverOff);
 		}
-		
+
 		if(params.onLook) {
 			plane.addEventListener('lookat', params.onLook);
 		}
 		if(params.lookOff) {
 			plane.addEventListener('lookoff', params.lookOff);
 		}
-				
+
 		this.sceneCube.add(plane);
 		this.objects.push(plane);
 
 		return plane;
 	};
-	
+
 	/**
 	* Add a bitmap image into the skybox as a DOM element using the CSS renderer
-	* @param path Path to the image to display
-	* @param params.x X coordinate for the image
-	* @param params.y Y coordinate for the image
-	* @param params.z z coordinate for the image
-	* @param params.width Optional width for the image
-	* @param params.height Optional height for the image
-	* @return The plane this image is placed on (the image DOM element can be accessed through plane.element)
+	* @function addImageCSS
+	* @param {string} path Path to the image to display
+	* @param {Object} params Configuration paramaters
+	* @param {number} params.x X coordinate for the image
+	* @param {number} params.y Y coordinate for the image
+	* @param {number} params.z Z coordinate for the image
+	* @param {number} params.width Optional width for the image
+	* @param {number} params.height Optional height for the image
+	* @return {THREE.CSS3DObject} The plane this image is placed on (the image DOM element can be accessed through plane.element)
 	**/
-	p.addImageCSS = function(path, params) {
-		var
-			x = params.x || 0,
-			y = params.y || 0,
-			z = params.z || 0,
-			img = new Image();
+	SkyCube.prototype.addImageCSS = function(path, params) {
+		var x = params.x || 0;
+		var y = params.y || 0;
+		var z = params.z || 0;
+		var img = new Image();
 
 		img.src = path;
 		if(params.width) {
@@ -540,162 +617,164 @@
 			rotation: params.rotation
 		});
 	};
-	
+
 	/**
 	* Add a THREEJS object into the skybox with the given texture.
 	* Currently doesn't handle textures or animations.
-	* @param mesh Path to the object in JSON Object format
-	* @param x X coordinate for the image
-	* @param y Y coordinate for the image
-	* @param z z coordinate for the image
+	* @function addObject
+	* @param {Object} params Configuration object
+	* @param {string} params.mesh Path to the object in JSON Object format
+	* @param {number} params.x X coordinate for the image
+	* @param {number} params.y Y coordinate for the image
+	* @param {number} params.z z coordinate for the image
+	* @returns {Promise} An ES6 promise resolving the loaded object
 	**/
-	p.addObject = function(params) {
-		var
-			_this = this,
-			x = params.x || 0,
-			y = params.y || 0,
-			z = params.z || 0,
-			loader = new THREE.ObjectLoader();
-			
-			return new Promise(function(resolve, reject) {
-				if(!params.model) {
-					reject(new Error('No model set'));
-				}
-				
-				loader.load(params.model, function(obj) {
-					obj.position.x = x;
-					obj.position.y = y;
-					obj.position.z = z;
-					
-					_this.sceneCube.add(obj);
-					_this.objects.push(obj);
-				
-					resolve(obj);
-				});
-			});
-	};
-	
-	p.addObjMtl = function(params) {
-		var
-			_this = this,
-			x = params.x || 0,
-			y = params.y || 0,
-			z = params.z || 0,
-			loader = new THREE.OBJMTLLoader();
-			if(!params.obj) {
-				throw new Error('No obj file specified');
-			}
-			if(!params.mtl) {
-				throw new Error('No MTL file specified');
-			}
-			return new Promise(function(resolve, reject) {
-				loader.load(params.obj, params.mtl, function(object) {
-					object.position.x = x;
-					object.position.y = y;
-					object.position.z = z;
+	SkyCube.prototype.addObject = function(params) {
+		var x = params.x || 0;
+		var y = params.y || 0;
+		var z = params.z || 0;
+		var loader = new THREE.ObjectLoader();
 
-					if(params.rotation) {
-						object.rotation.x = params.rotation.x || 0;
-						object.rotation.y = params.rotation.y || 0;
-						object.rotation.z = params.rotation.z || 0;
-					} else {
-						object.lookAt(_this.cameraCube.position);
-					}
-					
-					_this.sceneCube.add(object);
-					_this.objects.push(object);
-					
-					resolve(object);
-				}, function() {}, function(xhr) {
-					reject(xhr);
-				});
-			});
+		return new Promise(function(resolve, reject) {
+			if(!params.model) {
+				reject(new Error('No model set'));
+			}
+
+			loader.load(params.model, function(obj) {
+				obj.position.x = x;
+				obj.position.y = y;
+				obj.position.z = z;
+
+				this.sceneCube.add(obj);
+				this.objects.push(obj);
+
+				resolve(obj);
+			}.bind(this));
+		}.bind(this));
 	};
-	
+
+	/**
+	* Add a THREEJS object and MTL into the skybox with the given texture.
+	* Currently doesn't handle textures or animations.
+	* @function addObjMtl
+	* @param {Object} params Configuration object
+	* @param {string} params.obj Path to the object in JSON Object format
+	* @param {string} params.mtl Path to the MTL file
+	* @param {number} params.x X coordinate for the image
+	* @param {number} params.y Y coordinate for the image
+	* @param {number} params.z z coordinate for the image
+	* @param {Object} params.rotation Object with rotations for this object
+	* @param {number} params.rotation.x X rotation for the image
+	* @param {number} params.rotation.y Y rotation for the image
+	* @param {number} params.rotation.z z rotation for the image
+	* @returns {Promise} An ES6 promise resolving the loaded object
+	**/
+	SkyCube.prototype.addObjMtl = function(params) {
+		var x = params.x || 0;
+		var y = params.y || 0;
+		var z = params.z || 0;
+		var loader = new THREE.OBJMTLLoader();
+
+		if(!params.obj) {
+			throw new Error('No obj file specified');
+		}
+		if(!params.mtl) {
+			throw new Error('No MTL file specified');
+		}
+		return new Promise(function(resolve, reject) {
+			loader.load(params.obj, params.mtl, function(object) {
+				object.position.x = x;
+				object.position.y = y;
+				object.position.z = z;
+
+				if(params.rotation) {
+					object.rotation.x = params.rotation.x || 0;
+					object.rotation.y = params.rotation.y || 0;
+					object.rotation.z = params.rotation.z || 0;
+				} else {
+					object.lookAt(this.cameraCube.position);
+				}
+
+				this.sceneCube.add(object);
+				this.objects.push(object);
+
+				resolve(object);
+			}.bind(this), function() {}, function(xhr) {
+				reject(xhr);
+			});
+		}.bind(this));
+	};
+
 	/**
 	* Add a 3d object into the skybox with the given texture
-	* @param mesh Path to the object in JSON Geometry format
-	* @param textureImage Path to the texture image (note that dimensions must be base 2)
-	* @param x X coordinate for the image
-	* @param y Y coordinate for the image
-	* @param z z coordinate for the image
+	* @function addMesh
+	* @param {Object} params Configuration parameters for the mesh
+	* @param {string} param.mesh Path to the object in JSON Geometry format
+	* @param {string} param.textureImage Path to the texture image (note that dimensions must be base 2)
+	* @param {number} param.x X coordinate for the image
+	* @param {number} param.y Y coordinate for the image
+	* @param {number} param.z z coordinate for the image
+	* @returns {Promise} ES6 promise resolving THREE.Mesh object
 	**/
-	p.addMesh = function(params) {
-		var 
-			_this,
-			x,
-			y,
-			z,
-			loader;
-			
-		_this = this;
-		// Handle params
+	SkyCube.prototype.addMesh = function(params) {
+		var x = params.x || 0;
+		var y = params.y || 0;
+		var z = params.z || 0;
+		var loader = new THREE.JSONLoader();
+
 		if(!params.model) {
 			throw new Error('No model set');
 		}
 		if(!params.texture) {
 			throw new Error('No texture set');
 		}
-		x = params.x || 0;
-		y = params.y || 0;
-		z = params.z || 0;
-		
-		loader = new THREE.JSONLoader();
-		
+
 		return new Promise(function(resolve, reject) {
 			loader.load(params.model, function( geometry ) {
-				var
-					texture,
-					material,
-					mesh,
-					animation;
-		
-				texture = THREE.ImageUtils.loadTexture(params.texture);
-				material = new THREE.MeshBasicMaterial({
+				var texture = THREE.ImageUtils.loadTexture(params.texture);
+				var material = new THREE.MeshBasicMaterial({
 					map: texture
 				});
-				mesh = new THREE.Mesh(geometry, material);
+				var mesh = new THREE.Mesh(geometry, material);
+				var animation = null;
+
 				mesh.position.x = x;
 				mesh.position.y = y;
 				mesh.position.z = z;
-			
+
+
 				if(params.onClick) {
 					mesh.onClick = params.onClick;
 				}
 				if(params.onLook) {
 					mesh.onLook = params.onLook;
 				}
+
 				// Force aniamation if animate is set to true (useful for debugging)
-				if(params.animate === true || (params.animate === undefined && mesh.geometry.animations)) {
+				if(params.animate === true || (params.animate !== false && mesh.geometry.animations)) { //eslint-disable-line no-extra-parens
 					if(!mesh.geometry.animations) {
 						reject(new Error('No animations set for model ' + params.model));
 					}
-				
+
 					animation = new THREE.Animation(mesh, mesh.geometry.animations[0]);
 					animation.play();
 				}
-		
-				_this.sceneCube.add(mesh);
-				_this.objects.push(mesh);
-				
+
+				this.sceneCube.add(mesh);
+				this.objects.push(mesh);
+
 				resolve(mesh);
-			});
-		});
+			}.bind(this));
+		}.bind(this));
 	};
-	
-	p.addCollada = function(params) {
-		var 
-			loader,
-			_this;
-			
+
+	SkyCube.prototype.addCollada = function(params) {
+		var loader = new THREE.ColladaLoader();
+
 		if(!params.model) {
 			throw new Error('No object set');
 		}
-		
-		loader = new THREE.ColladaLoader();
-		_this = this;
-		
-		
+
 		loader.options.convertUpAxis = true;	// Not sure what this does
 		return new Promise(function(resolve) {
 			loader.load(params.model, function(collada) {
@@ -721,26 +800,33 @@
 					dae.rotation.y = params.rotation.y || 0;
 					dae.rotation.z = params.rotation.z || 0;
 				} else {
-					dae.lookAt(_this.cameraCube.position);
+					dae.lookAt(this.cameraCube.position);
 				}
-			
+
 				dae.updateMatrix();
-			
-				_this.sceneCube.add(dae);
+
+				this.sceneCube.add(dae);
 				resolve(dae);
-			});
-		});
+			}.bind(this));
+		}.bind(this));
 	};
-	
+
+	/**
+	 * Convert a CSS formatted dimension (px or %) to the number of pixels it represents
+	 * @function convertHtmlDimensionToPx
+	 * @param {string} dimensionString The CSS formatted string to be cleaned/converted
+	 * @returns {number} The number of pixes this dimension measures
+	 * @throws {Error} String must be a valid CSS dimension string
+	 **/
 	function convertHtmlDimensionToPx(dimensionString) {
 		var clean = null;
 		var numRegex = /[0-9]+/;
 		var percentRegex = /([0-9]+)%/;
 		var pxRegex = /([0-9]+)px/;
 
-		var matches;
-		if(dimensionString === parseInt(dimensionString) || dimensionString.search(numRegex)) {
-			clean = parseInt(dimensionString);
+		var matches = null;
+		if(dimensionString === parseInt(dimensionString, 10) || dimensionString.search(numRegex)) {
+			clean = parseInt(dimensionString, 10);
 		} else if((matches = percentRegex.exec(dimensionString)) !== null) {
 			// If percent is set get the width as a percent of the window
 			clean = window.innerWidth * (parseInt(matches[1], 10) / 100);
@@ -752,32 +838,47 @@
 		return clean;
 	}
 
-	p.addDomElem = function(params) {
-		var 
-			position,
-			rotation,
-			cssObject,
-			element = params.element,
-			defaultDimensions = 360,	// This value is effectively arbitrary. It sets the plane dimensions if none are specified and we can't calculate them
-			planeMaterial,
-			planeWidth,
-			planeHeight,
-			planeGeometry,
-			planeMesh;
-		
-		
+	/**
+	 * Add a HTML DOM element using the CSS renderer
+	 * @function addDomElem
+	 * @param {Object} params Configuration settings
+	 * @param {Object} DOM Element to add
+	 * @param {number} width The width dimension for this element (defaults to element width if it can be calculated)
+	 * @param {number} height The height dimension for this element (defaults to element height if it can be calculated)
+	 * @param {Object} params.position Position settings for element
+	 * @param {number} params.position.x X coordinate to place element
+	 * @param {number} params.position.y Y coordinate to place element
+	 * @param {number} params.position.z Z coordinate to place element
+	 * @param {Object} params.rotation Rotation settings for element
+	 * @param {number} params.rotation.x X coordinate to rotate element
+	 * @param {number} params.rotation.y Y coordinate to rotate element
+	 * @param {number} params.rotation.z Z coordinate to rotate element
+	 * @returns {THREE.CSS3DObject} Created THREE CSS object
+	 **/
+	SkyCube.prototype.addDomElem = function(params) {
+		var position = params.posiiton || {};
+		var rotation = params.rotation || {};
+		var cssObject = null;
+		var element = params.element;
+		var defaultDimensions = 360;	// This value is effectively arbitrary. It sets the plane dimensions if none are specified and we can't calculate them
+		var planeMaterial = null;
+		var planeWidth = null;
+		var planeHeight = null;
+		var planeGeometry = null;
+		var planeMesh = null;
+
+
 		if(!element) {
 			throw new Error('No element set');
 		}
-		
+
 		// Get or calculate the plane dimensions
 		planeWidth = params.width || element.offsetWidth || element.width || element.style.width || defaultDimensions;
 		planeWidth = convertHtmlDimensionToPx(planeWidth);
 		planeHeight = params.height || element.offsetHeight || element.width || element.style.height || defaultDimensions;
 		planeHeight = convertHtmlDimensionToPx(planeHeight);
-		
-		
-		position = params.position || {};
+
+
 		if(!position.x) {
 			position.x = 0;
 		}
@@ -787,7 +888,6 @@
 		if(!position.z) {
 			position.z = 0;
 		}
-		rotation = params.rotation || {};
 		if(!rotation.x) {
 			rotation.x = 0;
 		}
@@ -797,8 +897,7 @@
 		if(!rotation.z) {
 			rotation.z = 0;
 		}
-		
-		
+
 		cssObject = new THREE.CSS3DObject(element);
 		cssObject.position.x = position.x;
 		cssObject.position.y = position.y;
@@ -814,6 +913,7 @@
 		planeGeometry = new THREE.PlaneBufferGeometry( planeWidth, planeHeight );
 		planeMesh = new THREE.Mesh( planeGeometry, planeMaterial );
 		planeMesh.position.y += planeHeight / 2;
+
 		// add it to the standard (WebGL) scene
 		this.sceneCube.add(cssObject);
 		this.cssScene.add(cssObject);
@@ -824,19 +924,16 @@
 	/**
 	* Draw the skycube
 	* @function render
-	* @memberof Skycube
+	* @returns {null} No return value
 	*/
-	p.render = function() {
-		var 
-			delta,
-			animationIndex;
+	SkyCube.prototype.render = function() {
+		var delta = this.clock.getDelta();
+		var animationIndex = 0;
 
-//		this.camera.lookAt(this.scene.position);
 		this.cameraCube.rotation.copy(this.camera.rotation);
 		this.cameraCube.fov = this.camera.fov;
 		this.cameraCube.updateProjectionMatrix();
 
-		delta = this.clock.getDelta();
 		for(animationIndex = 0; animationIndex < this.animations; animationIndex++) {
 			this.animations[animationIndex].update(delta);
 		}
@@ -844,8 +941,6 @@
 		THREE.AnimationHandler.update(delta);
 
 		this.renderer.render(this.sceneCube, this.cameraCube );
-//		this.renderer.render(this.scene, this.camera );
-
 		this.cssRenderer.render(this.cssScene, this.cameraCube);
 	};
 
@@ -853,80 +948,82 @@
 	/**
 	* Animate the skycube by redrawing it in a loop. The animation loop currently cannot be stopped
 	* @function animate
-	* @memberof Skycube
+	* @returns {SkyCube} The current instance
 	*/
-	p.animate = function() {
+	SkyCube.prototype.animate = function() {
 		requestAnimationFrame(this.animate.bind(this));
 		this.controls.update();
 		this.render();
+		return this;
 	};
-	
+
 	/**
 	* Get array of objects under the mouse cursor
-	* @return Array of ThreeJS objects under mouse
+	* @function getObjectsUnderMouse
+	* @param {Event} event A Javascript mouse/touch event
+	* @return {Array} All THREEJS objects under mouse
 	*/
-	p.getObjectsUnderMouse = function(event) {
-		var 
-			xCoord = event.clientX || event.changedTouches[0].clientX,
-			yCoord = event.clientY || event.changedTouches[0].clientY,
-			mouse,
-			vector,
-			ray,
-			intersects;
+	SkyCube.prototype.getObjectsUnderMouse = function(event) {
+		var xCoord = event.clientX || event.changedTouches[0].clientX;
+		var yCoord = event.clientY || event.changedTouches[0].clientY;
+		var mouse = new THREE.Vector3(xCoord / window.innerWidth * 2 - 1, -( yCoord / window.innerHeight ) * 2 + 1, 1);
+		var vector = new THREE.Vector3( mouse.x, mouse.y, 1 );
+		var ray = null;
+		var intersects = null;
 
-		mouse = new THREE.Vector3((xCoord / window.innerWidth ) * 2 - 1, -( yCoord / window.innerHeight ) * 2 + 1, 1);
-
-		vector = new THREE.Vector3( mouse.x, mouse.y, 1 );
 		vector.unproject(this.cameraCube);
 		ray = new THREE.Raycaster(this.cameraCube.position, vector.sub(this.cameraCube.position).normalize());
 
 		intersects = ray.intersectObjects(this.objects);
 		return intersects;
 	};
-	
+
 	/**
 	* As click on the canvas doesn't guarantee the same start/stop point get the objects we intersect on mouse down and bind a mouseup event to check if they match.
 	* If the mousedown and mouseup are on the same object dispatch click on that object
-	* @param event DOM event for mouse click
+	* @function onMouseDown
+	* @param {Event} downEvent Javascript event for mouse click
+	* @returns {null} No return value
 	**/
-	p.onMouseDown = function(downEvent) {
+	SkyCube.prototype.onMouseDown = function(downEvent) {
 		var intersectsDown = this.getObjectsUnderMouse(downEvent);
 		if(intersectsDown.length > 0) {
-			var mouseUpFunc = (function(upEvent) {
+			var mouseUpFunc = function(upEvent) {
 				var intersectsUp = this.getObjectsUnderMouse(upEvent);
 				if(intersectsUp.length > 0 && intersectsUp[0].object === intersectsDown[0].object) {
 					intersectsUp[0].object.dispatchEvent({type: 'click'});
-				} else if(this.clickNothing){
+				} else if(this.clickNothing) {
 					this.clickNothing(event);
 				}
 				document.body.removeEventListener('mouseup', mouseUpFunc, false);
 				document.body.removeEventListener('touchend', mouseUpFunc, false);
-			}).bind(this);
+			}.bind(this);
 			document.body.addEventListener('mouseup', mouseUpFunc, false);
 			document.body.addEventListener('touchend', mouseUpFunc, false);
 		}
 	};
-	
+
 	/**
 	* Mouse move event used if hover effects are used. This event is only bound if hoverEnabled is true as it could potentially be expensive
 	* Checks if the mouse intersects with an object and if so calls the hover event on it. If not objects are found it calls the hoverNowhere event if set.
-	* @param event DOM event for mouse move
+	* @function onMouseMove
+	* @param {Event} event Javascript event for mouse move
+	* @returns {null} No return value
 	**/
-	p.onMouseMove = function(event) {
-		var 
-			mouse,
-			vector,
-			ray,
-			intersects;
-		
-		mouse = new THREE.Vector3((event.clientX / window.innerWidth ) * 2 - 1, -( event.clientY / window.innerHeight ) * 2 + 1, 1);
+	SkyCube.prototype.onMouseMove = function(event) {
+		var mouse = null;
+		var vector = null;
+		var ray = null;
+		var intersects = null;
+
+		mouse = new THREE.Vector3(event.clientX / window.innerWidth * 2 - 1, -( event.clientY / window.innerHeight ) * 2 + 1, 1);
 
 		vector = new THREE.Vector3( mouse.x, mouse.y, 1 );
 		vector.unproject(this.cameraCube);
 		ray = new THREE.Raycaster(this.cameraCube.position, vector.sub(this.cameraCube.position).normalize());
 
 		intersects = ray.intersectObjects(this.objects);
-		if(intersects.length > 0){
+		if(intersects.length > 0) {
 			if(intersects[0].object !== this.hoverTarget) {
 				if(this.hoverTarget) {
 					this.hoverTarget.dispatchEvent(mouseOutEvt);
@@ -936,7 +1033,7 @@
 				mouseOnEvt.clientY = event.clientY;
 				this.hoverTarget.dispatchEvent(mouseOnEvt);
 			}
-			
+
 		} else {
 			if(this.hoverTarget) {
 				this.hoverTarget.dispatchEvent(mouseOutEvt);
@@ -944,14 +1041,15 @@
 			}
 		}
 	};
-	
+
 	/**
-	* Event called on camera move to detect if the camera is looking directly at an object. 
+	* Event called on camera move to detect if the camera is looking directly at an object.
 	* Draws a vector from the camera and checks if it intersects with any objects. If it does it calls the onLook function on the first object. If no objects are found it calls the lookNowhere event if set
 	* Please note that this does not currently locate CSS objects.
-	* @param event DOM event for mouse move
+	* @function onLookAt
+	* @returns {null} No return value
 	**/
-	p.onLookAt = function() {
+	SkyCube.prototype.onLookAt = function() {
 		var vector = new THREE.Vector3(0, 0, -1);
 		vector.applyQuaternion(this.cameraCube.quaternion);
 		var ray = new THREE.Raycaster(this.cameraCube.position, vector);
@@ -962,7 +1060,7 @@
 			var newMatches = [];
 			intersects.forEach(function(object) {
 				var oldIndex = this.lookTargets.indexOf(object);
-				if(oldIndex === -1) {
+				if(oldIndex < 0) {
 					// New so fire event
 					object.dispatchEvent(lookAtEvt);
 				} else {
@@ -970,11 +1068,13 @@
 					this.lookTargets.splice(oldIndex, 1);
 				}
 				newMatches.push(object);
-			});
-			// Anything left in lookTargets is no longer being looked at so cool lookOff
+			}.bind(this));
+
+			// Anything left in lookTargets is no longer being looked at so call lookOff
 			this.lookTargets.forEach(function(object) {
 				object.dispatchEvent(lookOffEvt);
 			});
+
 			// Replace with the new list
 			this.lookTargets = newMatches;
 		} else {
@@ -995,12 +1095,14 @@
 			}
 		}
 	};
-	
+
 	/**
-	* Zoom on scrollwheel - This should be handled by OrbitControls but the current version doesn't appear to work. 
-	* @param event The DOM Event for scrollwheel
+	* Zoom on scrollwheel - This should be handled by OrbitControls but the current version doesn't appear to work.
+	* @function onMouseWheel
+	* @param {Event} event The Javascript Event for scrollwheel
+	* @returns {null} no return value
 	**/
-	p.onMouseWheel = function(event) {
+	SkyCube.prototype.onMouseWheel = function(event) {
 		var delta = event.wheelDelta || event.detail || 0;
 		if(delta > 0) {
 			this.camera.fov -= 5;
@@ -1014,35 +1116,188 @@
 			}
 		}
 	};
-	
-	
+
+
 	/**
 	* Zoom camera to specified FOV using an ease-in tween
-	* @param zoomLevel the new desired camera field of view
+	* @function zoom
+	* @param {number} zoomLevel the new desired camera field of view
+	* @param {number} time The time in milliseconds to spend tweening to zoom
+	* @returns {SkyBox} The current Skybox instance
 	**/
-	p.zoom = function(zoomLevel, time) {
+	SkyCube.prototype.zoom = function(zoomLevel, time) {
 		time = time || 1000;
 		var framerate = 10;
 		var steps = time / framerate;
 		var distance = zoomLevel - this.camera.fov;
 		var avgStep = distance / steps;
 		var stepWeight = 2;
-		var _this = this;
-		
+
 		var interval = setInterval(function() {
 			// console.log("Step weight: "+stepWeight+", FOV: "+_this.camera.fov+", AvgStep: "+avgStep+", ThisStep: "+(avgStep * stepWeight));
-			_this.camera.fov += avgStep * stepWeight;
+			this.camera.fov += avgStep * stepWeight;
 			stepWeight -= 1.5 / steps;
-			if(_this.camera.fov <= zoomLevel) {
-				_this.camera.fov = zoomLevel;
+			if(this.camera.fov <= zoomLevel) {
+				this.camera.fov = zoomLevel;
 				clearInterval(interval);
 			}
-		}, framerate);
+		}.bind(this), framerate);
 	};
-	
-	p.lookAt = function(obj) {
-		var target = obj.position || obj;
-		this.controls.target = target;
+
+	/***************************
+	* Rotator/Lookat functions *
+	***************************/
+
+	/**
+	* Get the coordinates for a point in front of the camera
+	* @param {number} dist The distance in front of the camera to fetch the point from. Defaults to 200
+	* @returns {THREE.Vector3} Coordinates for the point in from of the camera at the given distance
+	**/
+	SkyCube.prototype.getPointInFront = function(dist) {
+		dist = dist || 200;
+		var vec = new THREE.Vector3(0, 0, -dist);
+		vec.applyQuaternion(this.camera.quaternion);
+		return vec;
 	};
-	
+
+	/**
+	* Move the orbit camera to the other side than the target. This aligns the two cameras looking at the target
+	* @param {THREE.Vector3} target Coordinates of the point to look at
+	* @returns {SkyCube} The current instance
+	**/
+	SkyCube.prototype.lookAt = function(target) {
+		if(this.controls.object.position.equals(this.controls.target)) {
+			//
+			this.controls.object.position.setX(this.controls.object.position.x + 500);
+		}
+		var radius = this.controls.object.position.distanceTo(this.controls.target);	// Radius for orbit controls
+		var distToTarget = this.controls.target.distanceTo(target);
+		var dir = this.controls.target.clone().sub(target).normalize().multiplyScalar(radius + distToTarget);
+
+		this.controls.object.position.copy(target).add(dir);
+		return this;
+	};
+
+	/**
+	* Animation loop - intended to be called by window.requestAnimationFrame()
+	* @param {number} timestamp The current animation timestamp
+	* @returns {null} No return value
+	**/
+	SkyCube.prototype.step = function(timestamp) {
+		if(this.panning) {
+			// First check where we are currently looking
+			var radius = this.controls.object.position.distanceTo(this.controls.target);
+			var currentTarget = this.getPointInFront(radius * 2);
+			if(this.target) {
+				// If we have a target pan to it
+				// TODO: Check delta time before setting distance
+
+				if(currentTarget.distanceTo(this.target) <= this.speedScale) {
+					this.lookAt(this.target);
+
+					this.target = null;
+					this.panning = false;
+					if(this.callback) {
+						this.callback();
+						this.callback = null;
+					}
+				} else {
+					var dir = this.target.clone().sub(currentTarget).normalize().multiplyScalar(this.speedScale);
+					currentTarget.add(dir);
+					this.lookAt(currentTarget);
+					window.requestAnimationFrame(this.step.bind(this));
+				}
+
+			} else {
+				// Otherwise just rotate
+				var angle = timestamp * this.speedScale;
+				var currentPosition = this.rotateCentre || this.object.target;
+				var targetPosition = currentPosition.clone();
+				var x = currentPosition.x + Math.sin(angle) * this.radius;
+				var z = currentPosition.z + Math.cos(angle) * this.radius;
+				var y = currentPosition.y;
+				if(this.circle && this.circle.y) {
+					y = this.circle.y;
+				}
+
+				targetPosition.x = x;
+				targetPosition.z = z;
+				targetPosition.y = y;
+				this.lookAt(targetPosition);
+				window.requestAnimationFrame(this.step.bind(this));
+			}
+		}
+	};
+
+	/**
+	* Pan the camera to the target point
+	* @param {THREE.Vector3} target Coordinates of the point to pan to
+	* @param {number} speed The animation speed to pan. Defaults to baseSpeed of the rotator
+	* @param {Function} callback Callback function to call on completion of panning
+	* @returns {SkyCube} The current instance
+	**/
+	SkyCube.prototype.panToPoint = function(target, speed, callback) {
+		// Put the target point on the same radius as the camera orbit
+		var radius = this.controls.object.position.distanceTo(this.controls.target);
+		var dir = target.clone().sub(this.controls.target).normalize().multiplyScalar(radius * 2);
+		target = this.controls.target.clone().add(dir);
+
+		// Calculate how far we have to move
+		var currentTarget = this.getPointInFront(radius * 2);
+		var moveDist = currentTarget.distanceTo(target);
+
+		// Now caluclate speed
+		this.speed = speed || this.baseSpeed;
+		this.speedScale = moveDist / this.speed;
+		this.target = target;
+		this.callback = callback;
+
+		this.panning = true;
+
+		// Stop if user takes control
+		this.controls.addEventListener('start', function() {
+			this.stop();
+		}.bind(this));
+
+		window.requestAnimationFrame(this.step.bind(this));
+		return this;
+	};
+
+	/**
+	* Focus the camera on a rotating point
+	* @param {number} speed The time in seconds to complete a rotation. Defaults to baseSpeed from constructor
+	* @param {number} radius The radius of the circle to follow. Defaults to baseRadius from the constructor
+	* @param {Object} centre The centrepoint of the circle (object with x, y, z coordinates). Defaults to the camera position
+	* @returns {SkyCube} The current instance
+	**/
+	SkyCube.prototype.rotate = function(speed, radius, centre) {
+
+		this.speed = speed || this.baseSpeed;
+		this.speedScale = 0.001 * 2 * Math.PI / this.speed;
+
+		this.radius = radius || this.baseRadius;
+		this.rotateCentre = centre;
+
+		this.panning = true;
+
+		// Stop if user takes control
+		this.controls.addEventListener('start', function() {
+			this.stop();
+		}.bind(this));
+
+		window.requestAnimationFrame(this.step.bind(this));
+		return this;
+	};
+
+	/**
+	* Stop current motion
+	* @returns {SkyCube} The current instance
+	**/
+	SkyCube.prototype.stop = function() {
+		this.panning = false;
+		this.target = null;
+		this.callback = null;
+		return this;
+	};
+
 }());
