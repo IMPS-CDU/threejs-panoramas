@@ -5,7 +5,7 @@
 	'use strict';
 	var Positioner = function(target, lookAt) {
 		this.form = document.createElement('form');
-		this.form.class = 'position-form';
+		this.form.className = 'position-form';
 		this.inputs = {};
 		this.target = target;
 
@@ -44,9 +44,10 @@
 
 			fields.forEach((function(fieldName) {
 				target[type][fieldName] = parseInt(this.inputs[fieldName].value, 10);
+//				console.log('Set ' + type + ' ' + fieldName + ' to ' + this.inputs[fieldName].value);
 			}).bind(this));
 			if(lookAt) {
-				target.lookAt(lookAt);
+				target.lookAt(lookAt[type]);
 			}
 			return false;
 		}).bind(this));
