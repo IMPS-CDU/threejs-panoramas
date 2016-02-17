@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Panorama</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="css/bridge.css" />
+	</head>
+
+	<body>
+		<div id="loadingView">
+			<h2>Loading</h2>
+			<img src="images/spinner.svg" class="spinner" alt="loading"/>
+		</div>
+		<div id="skyboxDiv">
+		</div>
+		<div id="loadingError" class="hiddenContent"></div>
+		<div id="someContent" class="hiddenContent">
+			<div id="closeSomeContent" class="closeBtn">X</div>
+			<h2>Some content to show</h2>
+			<p>This is some content to pop up.</p>
+		</div>
+		
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.js"></script>
+		<script src="../../lib/OrbitControls.js"></script>
+		<script src="../../lib/CanvasRenderer.js"></script>
+		<script src="../../lib/Projector.js"></script>
+		<script src="../../lib/Detector.js"></script>
+		<script src="../../lib/CSS3DRenderer.js"></script>
+		<script src="../../src/js/skycube.js"></script>
+		<script src="../../src/js/positioner.js"></script>
+		<script src="js/bridge.js"></script>
+	</body>
+</html>
+

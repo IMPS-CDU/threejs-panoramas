@@ -1,0 +1,30 @@
+.hiddenContent {
+	display: none;
+}
+
+#loadingView {
+	position: absolute;
+	padding: 30px;
+	box-sizing: border-box;
+	width: 80%;
+	background: rgba(228,191,145, 0.8);
+	border-radius: 10px;
+	top: 40%;
+	left: 10%;
+}
+
+#someContent {
+	position: absolute;
+	padding: 30px;
+	box-sizing: border-box;
+	width: 80%;
+	background: rgba(228,191,145, 0.8);
+	border-radius: 10px;
+	top: 30%;
+	left: 10%;
+}
+.closeBtn {
+	float: right;
+	cursor: pointer;
+}
+
