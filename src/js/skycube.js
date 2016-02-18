@@ -1150,6 +1150,7 @@
 
 	/**
 	* Get the coordinates for a point in front of the camera
+	* @function getPointInFront
 	* @param {number} dist The distance in front of the camera to fetch the point from. Defaults to 200
 	* @returns {THREE.Vector3} Coordinates for the point in from of the camera at the given distance
 	**/
@@ -1162,6 +1163,7 @@
 
 	/**
 	* Move the orbit camera to the other side than the target. This aligns the two cameras looking at the target
+	* @function lookAt
 	* @param {THREE.Vector3} target Coordinates of the point to look at
 	* @returns {SkyCube} The current instance
 	**/
@@ -1180,6 +1182,7 @@
 
 	/**
 	* Animation loop - intended to be called by window.requestAnimationFrame()
+	* @function step
 	* @param {number} timestamp The current animation timestamp
 	* @returns {null} No return value
 	**/
@@ -1231,6 +1234,7 @@
 
 	/**
 	* Pan the camera to the target point
+	* @function panToPoint
 	* @param {THREE.Vector3} target Coordinates of the point to pan to
 	* @param {number} speed The animation speed to pan. Defaults to baseSpeed of the rotator
 	* @param {Function} callback Callback function to call on completion of panning
@@ -1265,6 +1269,7 @@
 
 	/**
 	* Focus the camera on a rotating point
+	* @function rotate
 	* @param {number} speed The time in seconds to complete a rotation. Defaults to baseSpeed from constructor
 	* @param {number} radius The radius of the circle to follow. Defaults to baseRadius from the constructor
 	* @param {Object} centre The centrepoint of the circle (object with x, y, z coordinates). Defaults to the camera position
@@ -1291,6 +1296,7 @@
 
 	/**
 	* Stop current motion
+	* @function stop
 	* @returns {SkyCube} The current instance
 	**/
 	SkyCube.prototype.stop = function() {
