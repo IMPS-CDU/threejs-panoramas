@@ -279,9 +279,6 @@
 			throw new Error('Missing images. Ensure images are set for right, left, top, bottom, front and back');
 		}
 
-		this.container = document.createElement( 'div' );
-		document.body.appendChild( this.container );
-
 		this.parentId = params.parentId;
 		this.container = document.getElementById(this.parentId);
 		this.images = params.images;
@@ -951,7 +948,7 @@
 	* @returns {SkyCube} The current instance
 	*/
 	SkyCube.prototype.animate = function() {
-		requestAnimationFrame(this.animate.bind(this));
+		this.animationId = requestAnimationFrame(this.animate.bind(this));
 		this.controls.update();
 		this.render();
 		return this;
@@ -1208,7 +1205,7 @@
 					var dir = this.target.clone().sub(currentTarget).normalize().multiplyScalar(this.speedScale);
 					currentTarget.add(dir);
 					this.lookAt(currentTarget);
-					window.requestAnimationFrame(this.step.bind(this));
+					this.cameraAnimationId = window.requestAnimationFrame(this.step.bind(this));
 				}
 
 			} else {
@@ -1227,7 +1224,7 @@
 				targetPosition.z = z;
 				targetPosition.y = y;
 				this.lookAt(targetPosition);
-				window.requestAnimationFrame(this.step.bind(this));
+				this.cameraAnimationId = window.requestAnimationFrame(this.step.bind(this));
 			}
 		}
 	};
@@ -1263,7 +1260,7 @@
 			this.stop();
 		}.bind(this));
 
-		window.requestAnimationFrame(this.step.bind(this));
+		this.cameraAnimationId = window.requestAnimationFrame(this.step.bind(this));
 		return this;
 	};
 
@@ -1275,13 +1272,13 @@
 	* @param {Object} centre The centrepoint of the circle (object with x, y, z coordinates). Defaults to the camera position
 	* @returns {SkyCube} The current instance
 	**/
-	SkyCube.prototype.rotate = function(speed, radius, centre) {
+	SkyCube.prototype.rotate = function(centre, speed, radius) {
 
 		this.speed = speed || this.baseSpeed;
 		this.speedScale = 0.001 * 2 * Math.PI / this.speed;
 
 		this.radius = radius || this.baseRadius;
-		this.rotateCentre = centre;
+		this.rotateCentre = centre || this.getPointInFront(1000).setY(-50);
 
 		this.panning = true;
 
@@ -1290,7 +1287,7 @@
 			this.stop();
 		}.bind(this));
 
-		window.requestAnimationFrame(this.step.bind(this));
+		this.cameraAnimationId = window.requestAnimationFrame(this.step.bind(this));
 		return this;
 	};
 
@@ -1303,6 +1300,23 @@
 		this.panning = false;
 		this.target = null;
 		this.callback = null;
+		return this;
+	};
+
+	/**
+	 * Destroy this skycube. Cancel animation, remove from the DOM and deallocate objects
+	 * @returns {SkyCube} the destroyed skycube instance
+	 **/
+	SkyCube.prototype.destroy = function() {
+		window.cancelAnimationFrame(this.animationId);
+		window.cancelAnimationFrame(this.cameraAnimationId);
+		this.container.removeChild(this.renderer.domElement);
+		this.container.removeChild(this.cssRenderer.domElement);
+		this.scene = null;
+		this.sceneCube= null;
+		this.camera = null;
+		this.cameraCube = null;
+		this.controls = null;
 		return this;
 	};
 
