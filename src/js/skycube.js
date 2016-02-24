@@ -68,14 +68,6 @@
 	 * @type THREE.Scene
 	 * @memberof SkyCube
 	 **/
-	SkyCube.prototype.scene = null;
-
-	/**
-	 * Scene used to render user view
-	 * @name camera
-	 * @type THREE.Scene
-	 * @memberof SkyCube
-	 **/
 	SkyCube.prototype.sceneCube = null;
 
 	/**
@@ -223,6 +215,14 @@
 	**/
 	SkyCube.prototype.rotateCentre = null;
 
+	/**
+	 * Event listeners bound to this skycube
+	 * @name eventListeners
+	 * @type Object
+	 * @memberof SkyCube
+	 **/
+	SkyCube.prototype.eventListeners = {};
+
 
 	/**
 	 * Check if webgl is avilable in the browser
@@ -262,10 +262,6 @@
 	* @returns {null} no return value
 	*/
 	SkyCube.prototype.init = function(params) {
-		var urls = null;
-		var textureCube = null;
-		var material = null;
-		var shader = null;
 		var boxSize = 100000;
 		var fov = 60;
 
@@ -288,8 +284,48 @@
 		// Create the cameras and scene
 		this.camera = new THREE.PerspectiveCamera( fov, window.innerWidth / window.innerHeight, 1, boxSize );
 		this.cameraCube = new THREE.PerspectiveCamera( fov, window.innerWidth / window.innerHeight, 1, boxSize );
-		this.scene = new THREE.Scene();
 		this.sceneCube = new THREE.Scene();
+
+
+		this.webgl = webglAvailable();
+		if ( this.webgl ) {
+			this.renderer = new THREE.WebGLRenderer();
+		} else {
+			this.renderer = new THREE.CanvasRenderer();
+		}
+
+		// This makes it a bit more version safe
+		if(this.renderer.setPixelRatio) {
+			this.renderer.setPixelRatio( window.devicePixelRatio );
+		}
+		this.renderer.setSize(window.innerWidth, window.innerHeight );
+		this.renderer.autoClear = false;
+		this.container.appendChild(this.renderer.domElement);
+
+		// Put the CSS renderer on top so we can render CSS elements over the WebGL canvas
+		this.cssRenderer = new THREE.CSS3DRenderer();
+		this.cssRenderer.setSize(window.innerWidth, window.innerHeight);
+		this.cssRenderer.domElement.style.position = 'absolute';
+		this.cssRenderer.domElement.style.top = 0;
+		this.container.appendChild(this.cssRenderer.domElement);
+		this.cssScene = new THREE.Scene();
+
+		this.cssRenderer.domElement.addEventListener('mousedown', this.onMouseDown.bind(this), false);
+		this.cssRenderer.domElement.addEventListener('touchstart', this.onMouseDown.bind(this), false);
+
+		this.controls = new THREE.OrbitControls(this.camera, this.cssRenderer.domElement);
+		this.controls.addEventListener('change', this.render.bind(this));
+
+		window.addEventListener('resize', this.onWindowResize.bind(this), false);
+
+		this.load(params);
+	};
+
+	SkyCube.prototype.load = function(params) {
+		var urls = null;
+		var textureCube = null;
+		var material = null;
+		var shader = null;
 
 		// Make the skycube
 		// Early versions built the cube in reverse. To avoid breaking anything using those versions you must explicitly state it is not reversed.
@@ -330,52 +366,25 @@
 		shader = THREE.ShaderLib.cube;
 		shader.uniforms.tCube.value = textureCube;
 
-		material = new THREE.ShaderMaterial( {
-
+		material = new THREE.ShaderMaterial({
 			fragmentShader: shader.fragmentShader,
 			vertexShader: shader.vertexShader,
 			uniforms: shader.uniforms,
 			depthWrite: false,
 			side: THREE.BackSide
-
-		} );
+		});
 
 		// Note that the mesh needs width/height/depth segmets set to a value like 7 for canvas renderer to avoid warping
 		var boxDimensions = params.boxDimensions || defaultBoxDimensions;
 		var boxSegments = params.boxSegments || defaultBoxSegments;
-		this.mesh = new THREE.Mesh( new THREE.BoxGeometry(boxDimensions, boxDimensions, boxDimensions, boxSegments, boxSegments, boxSegments), material );
+		var mesh = new THREE.Mesh( new THREE.BoxGeometry(boxDimensions, boxDimensions, boxDimensions, boxSegments, boxSegments, boxSegments), material );
+
+		if(this.mesh) {
+			this.sceneCube.remove(this.mesh);
+		}
+		this.mesh = mesh;
 		this.sceneCube.add(this.mesh);
-
-		this.webgl = webglAvailable();
-		if ( this.webgl ) {
-			this.renderer = new THREE.WebGLRenderer();
-		} else {
-			this.renderer = new THREE.CanvasRenderer();
-		}
-
-		// This makes it a bit more version safe
-		if(this.renderer.setPixelRatio) {
-			this.renderer.setPixelRatio( window.devicePixelRatio );
-		}
-		this.renderer.setSize(window.innerWidth, window.innerHeight );
-		this.renderer.autoClear = false;
-		this.container.appendChild(this.renderer.domElement);
-
-		// Put the CSS renderer on top so we can render CSS elements over the WebGL canvas
-		this.cssRenderer = new THREE.CSS3DRenderer();
-		this.cssRenderer.setSize(window.innerWidth, window.innerHeight);
-		this.cssRenderer.domElement.style.position = 'absolute';
-		this.cssRenderer.domElement.style.top = 0;
-		this.container.appendChild(this.cssRenderer.domElement);
-		this.cssScene = new THREE.Scene();
-
-		this.controls = new THREE.OrbitControls(this.camera, this.cssRenderer.domElement);
-
-		window.addEventListener('resize', this.onWindowResize.bind(this), false);
-		this.cssRenderer.domElement.addEventListener('mousedown', this.onMouseDown.bind(this), false);
-		this.cssRenderer.domElement.addEventListener('touchstart', this.onMouseDown.bind(this), false);
 		this.clickNothing = params.clickNothing;
-		this.controls.addEventListener('change', this.render.bind(this));
 
 		if(params.hoverEnabled !== false) {
 			this.enableHover();
@@ -466,7 +475,21 @@
 		default:
 			throw new Error('Unkown event: ' + eventType);
 		}
+		if(!this.eventListeners[eventType]) {
+			this.eventListeners[eventType] = [];
+		}
+		this.eventListeners[eventType].push(callback);
 		return this;
+	};
+
+	/**
+	 * Get currently bound event listeners for this event
+	 * @fucntion getEventListeners
+	 * @param {string} eventType the event to fetch event listeners for
+	 * @returns {array} An array of all currently bound event listeners
+	 **/
+	SkyCube.prototype.getEventListeners = function(eventType) {
+		return this.eventListeners[eventType] || [];
 	};
 
 	/**
@@ -1312,11 +1335,11 @@
 		window.cancelAnimationFrame(this.cameraAnimationId);
 		this.container.removeChild(this.renderer.domElement);
 		this.container.removeChild(this.cssRenderer.domElement);
-		this.scene = null;
 		this.sceneCube= null;
 		this.camera = null;
 		this.cameraCube = null;
 		this.controls = null;
+		this.eventListeners = {}; // With new controls we lose the event listeners
 		return this;
 	};
 
