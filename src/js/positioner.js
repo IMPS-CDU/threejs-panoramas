@@ -46,8 +46,9 @@
 				target[type][fieldName] = parseInt(this.inputs[fieldName].value, 10);
 //				console.log('Set ' + type + ' ' + fieldName + ' to ' + this.inputs[fieldName].value);
 			}).bind(this));
-			if(lookAt) {
-				target.lookAt(lookAt[type]);
+			if(lookAt && type === positionOption.value) {
+				// The position hasn't necessecarily updated unless we wait a moment
+				setInterval(function() { target.lookAt(lookAt);}, 100);
 			}
 			return false;
 		}).bind(this));
