@@ -982,8 +982,6 @@
 			this.animations[animationIndex].update(delta);
 		}
 
-		THREE.AnimationHandler.update(delta);
-
 		this.renderer.render(this.sceneCube, this.cameraCube );
 		this.cssRenderer.render(this.cssScene, this.cameraCube);
 	};
