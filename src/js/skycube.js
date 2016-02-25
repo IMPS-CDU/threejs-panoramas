@@ -460,11 +460,23 @@
 	/**
 	* Bind event handlers to controllers
 	* @function on
+	* @deprecated use addEventListener instead
 	* @param {string} eventType String event type to handle
 	* @param {Function} callback function to call when event is triggered
 	* @returns {SkyCube} the current instance
 	**/
 	SkyCube.prototype.on = function(eventType, callback) {
+		return this.addEventListener(eventType, callback);
+	};
+
+	/**
+	* Bind event handlers to controllers
+	* @function addEventListener
+	* @param {string} eventType String event type to handle
+	* @param {Function} callback function to call when event is triggered
+	* @returns {SkyCube} the current instance
+	**/
+	SkyCube.prototype.addEventListener = function(eventType, callback) {
 		switch (eventType) {
 		case 'change':
 			this.controls.addEventListener(eventType, callback);
@@ -479,6 +491,18 @@
 			this.eventListeners[eventType] = [];
 		}
 		this.eventListeners[eventType].push(callback);
+		return this;
+	};
+
+	/**
+	* remove a previously bound event handler from the controller
+	* @function removeEventListener
+	* @param {string} eventType String event type to remove
+	* @param {Function} callback currently bound callback to remove
+	* @returns {SkyCube} the current instance
+	**/
+	SkyCube.prototype.removeEventListener = function(eventType, callback) {
+		this.controls.removeEventListener(eventType, callback);
 		return this;
 	};
 
