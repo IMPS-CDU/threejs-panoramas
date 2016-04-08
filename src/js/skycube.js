@@ -295,8 +295,10 @@
 		}
 
 		var containerBounds = this.container.getBoundingClientRect();
-		var width = window.innerWidth - containerBounds.left;
-		var height = window.innerHeight - containerBounds.top;
+		console.log(containerBounds);
+		var width = containerBounds.width || window.innerWidth - containerBounds.left;
+		var height = containerBounds.height || window.innerHeight - containerBounds.top;
+		console.log(width +', ' + height);
 
 		// This makes it a bit more version safe
 		if(this.renderer.setPixelRatio) {
