@@ -294,19 +294,24 @@
 			this.renderer = new THREE.CanvasRenderer();
 		}
 
+		var containerBounds = this.container.getBoundingClientRect();
+		var width = window.innerWidth - containerBounds.left;
+		var height = window.innerHeight - containerBounds.top;
+
 		// This makes it a bit more version safe
 		if(this.renderer.setPixelRatio) {
 			this.renderer.setPixelRatio( window.devicePixelRatio );
 		}
-		this.renderer.setSize(window.innerWidth, window.innerHeight );
+		this.renderer.setSize(width, height);
 		this.renderer.autoClear = false;
 		this.container.appendChild(this.renderer.domElement);
 
 		// Put the CSS renderer on top so we can render CSS elements over the WebGL canvas
 		this.cssRenderer = new THREE.CSS3DRenderer();
-		this.cssRenderer.setSize(window.innerWidth, window.innerHeight);
+		this.cssRenderer.setSize(width, height);
 		this.cssRenderer.domElement.style.position = 'absolute';
-		this.cssRenderer.domElement.style.top = 0;
+		this.cssRenderer.domElement.style.top = containerBounds.top + 'px';
+		this.cssRenderer.domElement.style.left = containerBounds.left + 'px';
 		this.container.appendChild(this.cssRenderer.domElement);
 		this.cssScene = new THREE.Scene();
 
@@ -566,6 +571,8 @@
 	* @param {number} params.x X coordinate for the image
 	* @param {number} params.y Y coordinate for the image
 	* @param {number} params.z z coordinate for the image
+	* @param {number} params.width The width of the plane to place image on
+	* @param {number} params.height The height of the plane to place image on
 	* @return {THREE.Mesh} The plane this image is placed on
 	**/
 	SkyCube.prototype.addImage = function(params) {
