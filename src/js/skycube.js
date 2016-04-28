@@ -256,6 +256,7 @@
 	* @param {string} params.images.back path for image to display on the back of the skybox
 	* @param {Boolean} params.reverse Should the skybox be reversed (used of floor and roof have been generated backwards)
 	* @param {Function} params.loaded Callback when the cube has been loaded
+	* @param {Function} params.progress Callback for progress loading the cube
 	* @param {Function} params.error Callback if an error occurrs loading the cube
 	*
 	* @throws Error if parentId or images are not set
@@ -321,6 +322,8 @@
 		this.controls = new THREE.OrbitControls(this.camera, this.cssRenderer.domElement);
 		this.controls.addEventListener('change', this.render.bind(this));
 
+		this.textureLoader = new THREE.TextureLoader();
+
 		window.addEventListener('resize', this.onWindowResize.bind(this), false);
 
 		this.load(params);
@@ -366,7 +369,8 @@
 		}
 		material = new THREE.MeshFaceMaterial(materialArray);
 		*/
-		textureCube = THREE.ImageUtils.loadTextureCube(urls, null, params.loaded, params.error);
+		var cubeLoader = new THREE.CubeTextureLoader();
+		textureCube = cubeLoader.load(urls, params.loaded, params.progress, params.error);
 
 		shader = THREE.ShaderLib.cube;
 		shader.uniforms.tCube.value = textureCube;
@@ -590,7 +594,7 @@
 			throw new Error('Unable to add image: Image path is not set');
 		}
 
-		texture = THREE.ImageUtils.loadTexture( image );
+		texture = this.textureLoader.load(image);
 		if ( texture.minFilter !== THREE.NearestFilter && texture.minFilter !== THREE.LinearFilter ) {
 			texture.minFilter = THREE.NearestFilter;
 		}
@@ -1035,6 +1039,7 @@
 	* @returns {null} No return value
 	**/
 	SkyCube.prototype.onMouseDown = function(downEvent) {
+		console.log('MouseDown');
 		var intersectsDown = this.getObjectsUnderMouse(downEvent);
 		if(intersectsDown.length > 0) {
 			var mouseUpFunc = function(upEvent) {
