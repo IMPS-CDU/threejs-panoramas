@@ -1017,17 +1017,40 @@
 	* @return {Array} All THREEJS objects under mouse
 	*/
 	SkyCube.prototype.getObjectsUnderMouse = function(event) {
+		var bounding = this.renderer.domElement.getBoundingClientRect();
 		var xCoord = event.clientX || event.changedTouches[0].clientX;
 		var yCoord = event.clientY || event.changedTouches[0].clientY;
+
+		// At the top we need to subtract the top bounding but at the bottom we don't - god knows why
+		// So Determine what percent we are from the bottom and multiple the offset from that before subtracting
+		var yPercent = 1 - (yCoord / window.innerHeight);
+		yCoord -= bounding.top * yPercent;
+
 		var mouse = new THREE.Vector3(xCoord / window.innerWidth * 2 - 1, -( yCoord / window.innerHeight ) * 2 + 1, 1);
 		var vector = new THREE.Vector3( mouse.x, mouse.y, 1 );
+
+		vector.unproject(this.cameraCube);
+
+		/* draw an icon where the user clicks to test compensation for bounding
+		var dir = vector.sub(this.cameraCube.position).normalize();
+		var newPos = new THREE.Vector3();
+		newPos.addVectors(this.cameraCube.position, dir.multiplyScalar(500));
+		console.log(newPos);
+		var obj = this.addImage({
+			image: 'images/Info_circle.png',
+			x: newPos.x,
+			y: newPos.y,
+			z: newPos.z
+		});
+		*/
+		
 		var ray = null;
 		var intersects = null;
 
-		vector.unproject(this.cameraCube);
 		ray = new THREE.Raycaster(this.cameraCube.position, vector.sub(this.cameraCube.position).normalize());
 
 		intersects = ray.intersectObjects(this.objects);
+		console.log(intersects);
 		return intersects;
 	};
 
