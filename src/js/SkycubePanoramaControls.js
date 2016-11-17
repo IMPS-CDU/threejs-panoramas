@@ -972,6 +972,7 @@
 			this.animations[animationIndex].update(delta);
 		}
 
+		this.cameraCube.updateProjectionMatrix();
 		this.renderer.render(this.sceneCube, this.camera);
 		this.cssRenderer.render(this.cssScene, this.camera);
 	};
