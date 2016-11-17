@@ -232,6 +232,28 @@
 		}
 	}
 
+	function getOffset(elem) {
+		var offsetTop = 0;
+		var offsetLeft = 0;
+		var currElem = elem;
+
+		offsetTop += currElem.offsetTop;
+		offsetLeft += currElem.offsetLeft;
+		while(currElem.parentNode) {
+			currElem = currElem.parentNode;
+			if(currElem.offsetTop) {
+				offsetTop += currElem.offsetTop;
+			}
+			if(currElem.offsetLeft) {
+				offsetLeft += currElem.offsetLeft;
+			}
+		}
+		return {
+			top: offsetTop,
+			left: offsetLeft
+		};
+	}
+
 	/**
 	* Initalise a new skycube
 	* Requires the following paramsters:
@@ -289,13 +311,21 @@
 		if(this.renderer.setPixelRatio) {
 			this.renderer.setPixelRatio( window.devicePixelRatio );
 		}
-		this.renderer.setSize(window.innerWidth, window.innerHeight );
+		// Get the offset by injecting a dummy node so it doesn't matter if the container is hidden
+		var dummyNode = document.createElement('div');
+		this.container.parentNode.insertBefore(dummyNode, this.container);
+		var offset = getOffset(dummyNode);
+		this.container.parentNode.removeChild(dummyNode);
+		var panoWidth = Math.min(window.innerWidth, document.documentElement.clientWidth) - offset.left;
+		var panoHeight = Math.min(window.innerHeight, document.documentElement.clientHeight) - offset.top;
+
+		this.renderer.setSize(panoWidth, panoHeight);
 		this.renderer.autoClear = false;
 		this.container.appendChild(this.renderer.domElement);
 
 		// Put the CSS renderer on top so we can render CSS elements over the WebGL canvas
 		this.cssRenderer = new THREE.CSS3DRenderer();
-		this.cssRenderer.setSize(window.innerWidth, window.innerHeight);
+		this.cssRenderer.setSize(panoWidth, panoHeight);
 		this.cssRenderer.domElement.style.position = 'absolute';
 		this.cssRenderer.domElement.style.top = 0;
 		this.container.appendChild(this.cssRenderer.domElement);
