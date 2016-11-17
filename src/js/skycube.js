@@ -911,7 +911,7 @@
 	 * @returns {THREE.CSS3DObject} Created THREE CSS object
 	 **/
 	SkyCube.prototype.addDomElem = function(params) {
-		var position = params.posiiton || {};
+		var position = params.position || {};
 		var rotation = params.rotation || {};
 		var cssObject = null;
 		var element = params.element;
