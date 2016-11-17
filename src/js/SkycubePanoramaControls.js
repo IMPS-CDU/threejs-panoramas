@@ -276,8 +276,12 @@
 	* @returns {null} no return value
 	*/
 	SkyCube.prototype.init = function(params) {
-		var boxSize = 1000;
+		var defaultNear = 1;
+		var defaultFar = 100000;
 		var fov = 60;
+
+		var cameraNear = params.near || defaultNear;
+		var cameraFar = params.far || defaultFar;
 
 		if(!params.parentId) {
 			throw new Error('parentId is not set');
@@ -296,7 +300,7 @@
 		this.clock = new THREE.Clock();
 
 		// Create the cameras and scene
-		this.camera = new THREE.PerspectiveCamera( fov, window.innerWidth / window.innerHeight, 100, boxSize );
+		this.camera = new THREE.PerspectiveCamera( fov, window.innerWidth / window.innerHeight, cameraNear, cameraFar );
 		this.sceneCube = new THREE.Scene();
 
 
