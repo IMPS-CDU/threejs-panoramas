@@ -1031,17 +1031,23 @@
 	* @return {Array} All THREEJS objects under mouse
 	*/
 	SkyCube.prototype.getObjectsUnderMouse = function(event) {
+		var offset = getOffset(this.renderer.domElement);
+		var canvasSize = this.renderer.domElement.getBoundingClientRect();
 		var xCoord = event.clientX || event.changedTouches[0].clientX;
 		var yCoord = event.clientY || event.changedTouches[0].clientY;
-		var mouse = new THREE.Vector3(xCoord / window.innerWidth * 2 - 1, -( yCoord / window.innerHeight ) * 2 + 1, 1);
-		var vector = new THREE.Vector3( mouse.x, mouse.y, 1 );
-		var ray = null;
-		var intersects = null;
+		var mouse = new THREE.Vector3(
+			(xCoord - offset.left) / canvasSize.width * 2 - 1,
+			-((yCoord - offset.top) / canvasSize.height) * 2 + 1,
+			1
+		);
+		var vector = mouse
+			.unproject(this.camera)
+			.sub(this.camera.position)
+			.normalize();
 
-		vector.unproject(this.camera);
-		ray = new THREE.Raycaster(this.camera.position, vector.sub(this.camera.position).normalize());
+		var ray = new THREE.Raycaster(this.camera.position, vector);
 
-		intersects = ray.intersectObjects(this.objects);
+		var intersects = ray.intersectObjects(this.objects);
 		return intersects;
 	};
 
@@ -1229,21 +1235,13 @@
 	};
 
 	/**
-	* Move the orbit camera to the other side than the target. This aligns the two cameras looking at the target
+	* Wrapper for camera.lookAt
 	* @function lookAt
 	* @param {THREE.Vector3} target Coordinates of the point to look at
 	* @returns {SkyCube} The current instance
 	**/
 	SkyCube.prototype.lookAt = function(target) {
-		if(this.controls.object.position.equals(this.controls.target)) {
-			//
-			this.controls.object.position.setX(this.controls.object.position.x + 500);
-		}
-		var radius = this.controls.object.position.distanceTo(this.controls.target);	// Radius for orbit controls
-		var distToTarget = this.controls.target.distanceTo(target);
-		var dir = this.controls.target.clone().sub(target).normalize().multiplyScalar(radius + distToTarget);
-
-		this.controls.object.position.copy(target).add(dir);
+		this.camera.lookAt(target);
 		return this;
 	};
 
@@ -1256,9 +1254,9 @@
 	SkyCube.prototype.step = function(timestamp) {
 		if(this.panning) {
 			// First check where we are currently looking
-			var radius = this.controls.object.position.distanceTo(this.controls.target);
-			var currentTarget = this.getPointInFront(radius * 2);
 			if(this.target) {
+				var radius = this.camera.position.distanceTo(this.target);
+				var currentTarget = this.getPointInFront(radius);
 				// If we have a target pan to it
 				// TODO: Check delta time before setting distance
 
@@ -1274,11 +1272,14 @@
 				} else {
 					var dir = this.target.clone().sub(currentTarget).normalize().multiplyScalar(this.speedScale);
 					currentTarget.add(dir);
-					this.lookAt(currentTarget);
+					this.controls.lookAt(currentTarget);
+					//this.lookAt(currentTarget);
 					this.cameraAnimationId = window.requestAnimationFrame(this.step.bind(this));
 				}
 
 			} else {
+				var radius = 100; // Arbitrary radius to use rotatng
+				var currentTarget = this.getPointInFront(radius);
 				// Otherwise just rotate
 				var angle = timestamp * this.speedScale;
 				var currentPosition = this.rotateCentre || this.object.target;
@@ -1308,13 +1309,17 @@
 	* @returns {SkyCube} The current instance
 	**/
 	SkyCube.prototype.panToPoint = function(target, speed, callback) {
+		
+		/*
 		// Put the target point on the same radius as the camera orbit
 		var radius = this.controls.object.position.distanceTo(this.controls.target);
 		var dir = target.clone().sub(this.controls.target).normalize().multiplyScalar(radius * 2);
 		target = this.controls.target.clone().add(dir);
+		*/
 
 		// Calculate how far we have to move
-		var currentTarget = this.getPointInFront(radius * 2);
+		var radius = this.camera.position.distanceTo(target);
+		var currentTarget = this.getPointInFront(radius);
 		var moveDist = currentTarget.distanceTo(target);
 
 		// Now caluclate speed
