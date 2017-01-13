@@ -1093,13 +1093,7 @@
 		var ray = null;
 		var intersects = null;
 
-		mouse = new THREE.Vector3(event.clientX / window.innerWidth * 2 - 1, -( event.clientY / window.innerHeight ) * 2 + 1, 1);
-
-		vector = new THREE.Vector3( mouse.x, mouse.y, 1 );
-		vector.unproject(this.camera);
-		ray = new THREE.Raycaster(this.camera.position, vector.sub(this.camera.position).normalize());
-
-		intersects = ray.intersectObjects(this.objects);
+		intersects = this.getObjectsUnderMouse(event);
 		if(intersects.length > 0) {
 			if(intersects[0].object !== this.hoverTarget) {
 				if(this.hoverTarget) {
