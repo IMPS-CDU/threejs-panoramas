@@ -325,6 +325,10 @@
 
 		this.renderer.setSize(panoWidth, panoHeight);
 		this.renderer.autoClear = false;
+
+		// The container adds extra height if the children have size - which is a problem because they are sized to fit the screen exactly
+		this.renderer.domElement.style.position = 'absolute';
+		this.renderer.domElement.style.top = 0;
 		this.container.appendChild(this.renderer.domElement);
 
 		// Put the CSS renderer on top so we can render CSS elements over the WebGL canvas
