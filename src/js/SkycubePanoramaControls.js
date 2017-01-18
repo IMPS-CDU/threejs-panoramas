@@ -613,9 +613,11 @@
 	
 		var textureLoader = new THREE.TextureLoader();
 		texture = textureLoader.load(image);
-		if ( texture.minFilter !== THREE.NearestFilter && texture.minFilter !== THREE.LinearFilter ) {
-			texture.minFilter = THREE.NearestFilter;
-		}
+
+		texture.antistropy = 1;
+		texture.minFilter = THREE.LinearFilter;
+		texture.magFilter = THREE.LinearMipmapLinearFilter;
+
 		material = new THREE.MeshBasicMaterial({ map: texture, transparent: true});
 		material.polygonOffset = true;
 		material.polygonOffsetFactor = -4;
