@@ -1385,9 +1385,13 @@
 	SkyCube.prototype.destroy = function() {
 		window.cancelAnimationFrame(this.animationId);
 		window.cancelAnimationFrame(this.cameraAnimationId);
+		while(this.objects.length) {
+			this.sceneCube.remove(this.objects.pop());
+		}
+		this.objects = [];
 		this.container.removeChild(this.renderer.domElement);
 		this.container.removeChild(this.cssRenderer.domElement);
-		this.sceneCube= null;
+		this.sceneCube = null;
 		this.camera = null;
 		this.controls = null;
 		this.eventListeners = {}; // With new controls we lose the event listeners
