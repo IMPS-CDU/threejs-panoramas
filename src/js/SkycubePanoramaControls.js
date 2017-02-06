@@ -629,6 +629,7 @@
 		plane.position.z = z;
 
 		if(params.rotation) {
+			plane.rotation.order = params.rotation.order || 'XYZ';
 			plane.rotation.x = params.rotation.x || 0;
 			plane.rotation.y = params.rotation.y || 0;
 			plane.rotation.z = params.rotation.z || 0;

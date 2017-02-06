@@ -41,14 +41,15 @@
 			evt.preventDefault();
 
 			var type = this.selectType.options[this.selectType.selectedIndex].value;
+			target.rotation.order = 'YXZ';
 
 			fields.forEach((function(fieldName) {
-				target[type][fieldName] = parseInt(this.inputs[fieldName].value, 10);
-//				console.log('Set ' + type + ' ' + fieldName + ' to ' + this.inputs[fieldName].value);
+				target[type][fieldName] = parseFloat(this.inputs[fieldName].value);
+				console.log('Set ' + type + ' ' + fieldName + ' to ' + this.inputs[fieldName].value);
 			}).bind(this));
 			if(lookAt && type === positionOption.value) {
 				// The position hasn't necessecarily updated unless we wait a moment
-				setInterval(function() { target.lookAt(lookAt);}, 100);
+				setTimeout(function() { console.log("lookatme"); target.lookAt(lookAt);}, 100);
 			}
 			return false;
 		}).bind(this));
