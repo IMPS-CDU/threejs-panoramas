@@ -144,14 +144,14 @@
 	* @name mouseOnEvt
 	* @type Event
 	**/
-	var mouseOnEvt = new Event('mouseover');
+	var mouseOnEvt = {type: 'mouseover'};
 
 	/**
 	* Javascript event to dispatch when the mouse is moved off an object
 	* @name mouseOutEvt
 	* @type Event
 	**/
-	var mouseOutEvt = new Event('mouseout');
+	var mouseOutEvt = {type: 'mouseout'};
 
 	/**
 	* Target of current look event - used to determine if hover has changed when triggering events
@@ -166,14 +166,14 @@
 	* @name lookAtEvt
 	* @type Event
 	**/
-	var lookAtEvt = new Event('lookat');
+	var lookAtEvt = {type: 'lookat'};
 
 	/**
 	* Javascript event to dispatch when the camera no longer looks directly at an object (it may still be visible in the camera however)
 	* @name lookAtEvt
 	* @type Event
 	**/
-	var lookOffEvt = new Event('lookoff');
+	var lookOffEvt = {type: 'lookoff'};
 
 	/**
 	* Object holding event listeners for skybox so they can be disabled if required
