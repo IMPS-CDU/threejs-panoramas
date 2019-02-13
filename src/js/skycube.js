@@ -1,5 +1,5 @@
 /*eslint max-statements: 0, no-magic-numbers: 0, no-param-reassign: 0 */
-/*global THREE, requestAnimationFrame, console */
+/*global THREE, requestAnimationFrame, console, Promise */
 
 /**
 * Maybe handle touch events using tocca http://gianlucaguarini.github.io/Tocca.js/
@@ -775,7 +775,9 @@
 		var x = params.x || 0;
 		var y = params.y || 0;
 		var z = params.z || 0;
-		var loader = new THREE.JSONLoader();
+		var jsonLoader = new THREE.JSONLoader();
+		var textureLoader = new THREE.TextureLoader();
+		textureLoader.crossOrigin = '';
 
 		if(!params.model) {
 			throw new Error('No model set');
@@ -785,8 +787,8 @@
 		}
 
 		return new Promise(function(resolve, reject) {
-			loader.load(params.model, function( geometry ) {
-				var texture = THREE.ImageUtils.loadTexture(params.texture);
+			jsonLoader.load(params.model, function( geometry ) {
+				var texture = textureLoader.load(params.texture);
 				var material = new THREE.MeshBasicMaterial({
 					map: texture
 				});
@@ -1043,14 +1045,14 @@
 			z: newPos.z
 		});
 		*/
-		
+
 		var ray = null;
 		var intersects = null;
 
 		ray = new THREE.Raycaster(this.cameraCube.position, vector.sub(this.cameraCube.position).normalize());
 
 		intersects = ray.intersectObjects(this.objects);
-		console.log(intersects);
+
 		return intersects;
 	};
 
@@ -1062,7 +1064,6 @@
 	* @returns {null} No return value
 	**/
 	SkyCube.prototype.onMouseDown = function(downEvent) {
-		console.log('MouseDown');
 		var intersectsDown = this.getObjectsUnderMouse(downEvent);
 		if(intersectsDown.length > 0) {
 			var mouseUpFunc = function(upEvent) {
@@ -1347,9 +1348,9 @@
 	/**
 	* Focus the camera on a rotating point
 	* @function rotate
+	* @param {Object} centre The centrepoint of the circle (object with x, y, z coordinates). Defaults to the camera position
 	* @param {number} speed The time in seconds to complete a rotation. Defaults to baseSpeed from constructor
 	* @param {number} radius The radius of the circle to follow. Defaults to baseRadius from the constructor
-	* @param {Object} centre The centrepoint of the circle (object with x, y, z coordinates). Defaults to the camera position
 	* @returns {SkyCube} The current instance
 	**/
 	SkyCube.prototype.rotate = function(centre, speed, radius) {
